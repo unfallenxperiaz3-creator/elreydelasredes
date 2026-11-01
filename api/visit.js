@@ -2,7 +2,7 @@
 // solo el día, de dónde viene (TikTok, Instagram…) y si es la primera visita del día de ese navegador.
 import { db, json, readJson, madridDay } from '../lib/core.js';
 
-const KNOWN = ['tiktok', 'instagram', 'google', 'directo', 'otros'];
+const KNOWN = ['tiktok', 'instagram', 'youtube', 'twitch', 'kick', 'google', 'directo', 'otros'];
 
 export async function POST(request) {
   const b = await readJson(request);

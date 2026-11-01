@@ -92,6 +92,9 @@ img.avatar{object-fit:cover}
 .ver{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--gold-ink)}
 .ver svg{width:14px;height:14px}
 .unver{font-size:12px;color:var(--muted);font-style:italic}
+.net{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);border:1px solid #3a362f;border-radius:999px;padding:2px 10px}
+.net i{width:8px;height:8px;border-radius:50%;display:block}
+.seg.nets{grid-template-columns:repeat(3,1fr)}
 .fnd{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--on-gold);background:linear-gradient(135deg,#e6c878,#b08d3a);border-radius:3px;padding:1px 7px}
 .fbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px;padding:12px 16px;border:1px solid #5a4a22;border-radius:10px;background:linear-gradient(135deg,#1d180c,#121110);font-size:15px;color:var(--muted);max-width:640px}
 .fbar b{color:var(--gold-ink)}
@@ -305,7 +308,7 @@ footer .demo{margin-left:auto}
   <section class="hero">
     <h1>Paga. Sube.<br><span>Reina.</span></h1>
     <p class="claim">Sé el rey o la reina de las redes y haz que tus seguidores <em>te mantengan en lo más alto</em></p>
-    <p>El ranking de creadores de TikTok e Instagram donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio y deja que tus seguidores te suban. Gana la comunidad más fuerte de la semana.</p>
+    <p>El ranking de creadores de TikTok, Instagram, YouTube, Twitch y Kick donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio y deja que tus seguidores te suban. Gana la comunidad más fuerte de la semana.</p>
     <div class="fbar" id="fbar" hidden></div>
     <div class="ctas">
       <button class="btn btn-primary" id="cta-main">Soy creador: conseguir mi puesto</button>
@@ -318,7 +321,7 @@ footer .demo{margin-left:auto}
   <aside class="callout" aria-label="Cómo atraer apoyos">
     <span class="big" aria-hidden="true">+</span>
     <b>Obtén tu puesto y comparte tu enlace</b>
-    <p>Al pagar recibes tu enlace de apoyo personal. Ponlo en tu bio de TikTok o Instagram y en tus historias. <strong style="color:var(--ink)">Cada euro que aporten tus seguidores se suma a tu puesto</strong>, sin que tú pagues más. Y si empatas con otro creador, gana quien tenga más clics en su perfil desde el ranking (cada persona cuenta una sola vez).</p>
+    <p>Al pagar recibes tu enlace de apoyo personal. Ponlo en tu bio, en la descripción de tus vídeos o en tu canal, y compártelo en tus historias. <strong style="color:var(--ink)">Cada euro que aporten tus seguidores se suma a tu puesto</strong>, sin que tú pagues más. Y si empatas con otro creador, gana quien tenga más clics en su perfil desde el ranking (cada persona cuenta una sola vez).</p>
   </aside>
 
   <section id="ranking">
@@ -420,7 +423,15 @@ footer .demo{margin-left:auto}
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const eur = n => (+n).toLocaleString('es-ES') + ' €';
   const int = n => (+n).toLocaleString('es-ES');
-  function profileUrl(p, h) { return p === 'tiktok' ? `https://www.tiktok.com/@${h}` : `https://www.instagram.com/${h}/`; }
+  const NETS = {
+    tiktok: { name: 'TikTok', color: '#1F6FD6', url: h => `https://www.tiktok.com/@${h}`, where: 'tu bio de TikTok' },
+    instagram: { name: 'Instagram', color: '#7A3CC2', url: h => `https://www.instagram.com/${h}/`, where: 'tu bio de Instagram' },
+    youtube: { name: 'YouTube', color: '#C62828', url: h => `https://www.youtube.com/@${h}`, where: 'la descripción de tu canal y de tus vídeos de YouTube' },
+    twitch: { name: 'Twitch', color: '#C2185B', url: h => `https://www.twitch.tv/${h}`, where: 'los paneles de tu canal de Twitch y el chat' },
+    kick: { name: 'Kick', color: '#1E8E3E', url: h => `https://kick.com/${h}`, where: 'la descripción de tu canal de Kick y el chat' }
+  };
+  const netName = p => (NETS[p] || NETS.tiktok).name;
+  function profileUrl(p, h) { return (NETS[p] || NETS.tiktok).url(h); }
   function domain(u) { try { const x = new URL(u); return (x.hostname.replace(/^www\./, '') + x.pathname).replace(/\/$/, ''); } catch (e) { return u; } }
   function dur(ms) {
     ms = Math.max(ms, 0);
@@ -435,7 +446,7 @@ footer .demo{margin-left:auto}
     const ini = e.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2);
     return `<span class="avatar" aria-hidden="true">${esc(ini)}</span>`;
   }
-  const net = p => `<span class="tag">${p === 'tiktok' ? 'TikTok' : 'Instagram'}</span>`;
+  const net = p => { const c = (NETS[p] || NETS.tiktok).color; return `<span class="net" style="background:${c};border-color:${c};color:#FFE27A">${netName(p)}</span>`; };
   const verMark = e => e.verified ? `<span class="ver">${CHECK}Verificado</span>` : `<span class="unver">${e.verifyRequested ? 'Verificación pendiente' : 'Sin verificar'}</span>`;
   const fnd = e => e.founder ? `<span class="fnd" title="Uno de los 10 primeros creadores">Fundador nº${e.founder}</span>` : '';
   const invTag = e => e.invited ? '<span class="tag" style="color:var(--muted);border:1px solid #3a362f;border-radius:3px;padding:0 6px">Invitado</span>' : '';
@@ -889,9 +900,8 @@ footer .demo{margin-left:auto}
       <form id="bidform" novalidate>
         ${me ? '' : `
         <div class="field"><span class="lbl" id="lbl-plat">Red social</span>
-          <div class="seg" role="group" aria-labelledby="lbl-plat">
-            <button type="button" aria-pressed="true" data-p="tiktok">TikTok</button>
-            <button type="button" aria-pressed="false" data-p="instagram">Instagram</button>
+          <div class="seg nets" role="group" aria-labelledby="lbl-plat">
+            ${Object.entries(NETS).map(([k, n], i) => `<button type="button" aria-pressed="${i === 0}" data-p="${k}"><span class="net" style="background:${n.color};border-color:${n.color};color:#FFE27A">${n.name}</span></button>`).join('')}
           </div></div>
         <div class="field"><label for="in-handle">Usuario</label>
           <input id="in-handle" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@tuusuario" maxlength="31">
@@ -987,7 +997,7 @@ footer .demo{margin-left:auto}
         form.name = $('in-name').value.trim() || form.handle;
         form.url = $('in-url').value.trim();
         form.mail = $('in-mail').value.trim();
-        setErr('er-handle', /^[A-Za-z0-9._]{2,30}$/.test(form.handle) ? '' : 'Escribe tu usuario: letras, números, puntos o guiones bajos.', 'in-handle');
+        setErr('er-handle', /^[A-Za-z0-9._-]{2,30}$/.test(form.handle) ? '' : 'Escribe tu usuario: letras, números, puntos, guiones o guiones bajos.', 'in-handle');
         if (!form.cat) { $('er-cat').textContent = 'Elige tu nicho para entrar también en su ranking.'; catErr = true; }
         let u = null; try { u = new URL(form.url); } catch (e) {}
         setErr('er-url', u && u.protocol === 'https:' ? '' : 'Pega un enlace que empiece por https://', 'in-url');
@@ -1019,7 +1029,7 @@ footer .demo{margin-left:auto}
       paySheet({
         amount: form.amount,
         rows: [
-          ['Cuenta', me ? `@${me.handle} · ${me.platform === 'tiktok' ? 'TikTok' : 'Instagram'}` : `@${form.handle} · ${form.platform === 'tiktok' ? 'TikTok' : 'Instagram'}`],
+          ['Cuenta', me ? `@${me.handle} · ${netName(me.platform)}` : `@${form.handle} · ${netName(form.platform)}`],
           ['Enlace', domain(me ? me.url : form.url)],
           ...(me ? [['Llevas', eur(total(me))]] : []),
           ['Puesto tras pagar', `#${positionFor(t, me && me.id)}`]
@@ -1039,7 +1049,7 @@ footer .demo{margin-left:auto}
   async function verifyBox(e) {
     let code = '…';
     try { code = (await api('/api/creator', { action: 'me', creatorId: e.id, ownerToken: owned[e.id] })).verifyCode || '…'; } catch (err) {}
-    const red = e.platform === 'tiktok' ? 'TikTok' : 'Instagram';
+    const red = netName(e.platform);
     return `<div class="box">
       <span class="t">Demuestra que eres tú</span>
       <span class="code num">${esc(code)}</span>
@@ -1164,7 +1174,7 @@ footer .demo{margin-left:auto}
           <code id="sup-link">${esc(supportLink(e))}</code>
           <button class="btn btn-primary full" id="copylink">Copiar mi enlace de apoyo</button>
           <ol>
-            <li>Pégalo en tu bio de ${e.platform === 'tiktok' ? 'TikTok' : 'Instagram'}.</li>
+            <li>Pégalo en ${(NETS[e.platform] || NETS.tiktok).where}.</li>
             <li>Sube la imagen de abajo a tus historias con el enlace.</li>
             <li>Ponte una meta en tu comunidad: los fans aportan más cuando hay un objetivo.</li>
           </ol>
@@ -1215,7 +1225,7 @@ footer .demo{margin-left:auto}
       aviso: ['Aviso legal', [
         `Titular del sitio: ${owner}. NIF: ${nif}. Contacto: ${mail}.`,
         'El Rey de las Redes es un servicio de visibilidad para creadores de contenido: los usuarios pagan por posicionarse en un ranking público. No es un juego de azar ni ofrece premios en dinero.',
-        'TikTok e Instagram son marcas de sus respectivos dueños. Este sitio no está afiliado ni patrocinado por ellas.'
+        'TikTok, Instagram, YouTube, Twitch y Kick son marcas de sus respectivos dueños. Este sitio no está afiliado ni patrocinado por ninguna de ellas.'
       ]]
     };
   }
@@ -1233,7 +1243,7 @@ footer .demo{margin-left:auto}
   }
 
   function openFromPath() {
-    const m = location.pathname.match(/^\/@([A-Za-z0-9._]{2,30})\/?$/);
+    const m = location.pathname.match(/^\/@([A-Za-z0-9._-]{2,30})\/?$/);
     if (!m) return;
     const e = list().find(x => x.handle.toLowerCase() === m[1].toLowerCase());
     if (e) openSupport(e.id, false); else toast(`@${m[1]} no está en el ranking esta temporada`);
@@ -1254,7 +1264,7 @@ footer .demo{margin-left:auto}
     if (!src) {
       let host = '';
       try { host = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
-      src = /tiktok/.test(host) ? 'tiktok' : /instagram|ig\.me/.test(host) ? 'instagram'
+      src = /tiktok/.test(host) ? 'tiktok' : /instagram|ig\.me/.test(host) ? 'instagram' : /youtube|youtu\.be/.test(host) ? 'youtube' : /twitch/.test(host) ? 'twitch' : /kick\.com/.test(host) ? 'kick'
         : /google\./.test(host) ? 'google' : !host || host === location.hostname ? 'directo' : 'otros';
     }
     const day = new Date().toISOString().slice(0, 10);

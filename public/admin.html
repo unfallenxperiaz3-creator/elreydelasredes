@@ -146,7 +146,7 @@ a{color:var(--gold)}
     if (x) { if (!confirmInline(x)) return; try { await call('POST', { action: 'closeInvite', code: x.dataset.close }); await load(); } catch (e) { $('msg').textContent = e.message; } }
   });
 
-  const SRC = { tiktok: 'TikTok', instagram: 'Instagram', google: 'Google', directo: 'Directo o app', otros: 'Otras webs' };
+  const SRC = { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', twitch: 'Twitch', kick: 'Kick', google: 'Google', directo: 'Directo o app', otros: 'Otras webs' };
   function visitsHTML(d) {
     if (d.visits === null) return `<h2>Visitas</h2><p class="muted">Falta activar el contador: en Supabase → SQL Editor, ejecuta el bloque «Contador de visitas» del archivo supabase/schema.sql.</p>`;
     const days = (n) => { const t = new Date(d.today + 'T12:00:00'); t.setDate(t.getDate() - n); return t.toISOString().slice(0, 10); };

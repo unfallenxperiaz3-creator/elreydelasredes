@@ -180,3 +180,8 @@ begin
    where code = c and uses < max_uses and (expires_at is null or expires_at > now());
   return found;
 end $$;
+
+-- ===== Más redes sociales (añadido después; se puede ejecutar solo este bloque) =====
+alter table creators drop constraint if exists creators_platform_check;
+alter table creators add constraint creators_platform_check
+  check (platform in ('tiktok', 'instagram', 'youtube', 'twitch', 'kick'));
