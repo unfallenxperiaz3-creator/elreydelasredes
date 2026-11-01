@@ -10,7 +10,7 @@ export async function closeSeason() {
   if (done) return { ok: true, season, already: true };
   const { ranked } = await board(season);
   const king = ranked[0];
-  if (!king) return { ok: true, season, empty: true };
+  if (!king || king.own + king.fans <= 0) return { ok: true, season, empty: true };
   const { error } = await db().from('hall').insert({
     season, creator_id: king.id, name: king.name, handle: king.handle,
     total_cents: king.own + king.fans, fans: king.supporters.size

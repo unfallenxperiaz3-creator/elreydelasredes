@@ -438,6 +438,7 @@ footer .demo{margin-left:auto}
   const net = p => `<span class="tag">${p === 'tiktok' ? 'TikTok' : 'Instagram'}</span>`;
   const verMark = e => e.verified ? `<span class="ver">${CHECK}Verificado</span>` : `<span class="unver">${e.verifyRequested ? 'Verificación pendiente' : 'Sin verificar'}</span>`;
   const fnd = e => e.founder ? `<span class="fnd" title="Uno de los 10 primeros creadores">Fundador nº${e.founder}</span>` : '';
+  const invTag = e => e.invited ? '<span class="tag" style="color:var(--muted);border:1px solid #3a362f;border-radius:3px;padding:0 6px">Invitado</span>' : '';
   const foundersLeft = () => ST && ST.founders ? Math.max(0, ST.founders.total - ST.founders.taken) : 0;
   const list = () => ST ? ST.creators : [];
   const byId = id => list().find(x => x.id === id);
@@ -507,8 +508,9 @@ footer .demo{margin-left:auto}
       Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${filter === k ? 'selected' : ''}>${v}${count[k] ? ` · ${count[k]}` : ''}</option>`).join('');
   }
 
+  const hasKing = () => !!list()[0] && total(list()[0]) > 0;
   function renderThrone(anim) {
-    const k = list()[0];
+    const k = hasKing() ? list()[0] : null;
     if (!k) {
       $('throne').innerHTML = `
         <span class="th-water">${CROWN}</span>
@@ -552,7 +554,7 @@ footer .demo{margin-left:auto}
 
   function renderList() {
     const all = list(), niche = filter !== 'all';
-    const rows = all.map((e, i) => ({ e, i })).filter(({ e, i }) => niche ? e.cat === filter : i > 0);
+    const rows = all.map((e, i) => ({ e, i })).filter(({ e, i }) => niche ? e.cat === filter : (i > 0 || !hasKing()));
     $('list').innerHTML = rows.map(({ e, i }, r) => {
       const shown = niche ? r + 1 : i + 1;
       const t = total(e), mine = isMine(e), sub = subOf(e.id);
@@ -562,7 +564,7 @@ footer .demo{margin-left:auto}
         ${avatar(e)}
         <div class="info">
           <a class="nm" href="${esc(e.url)}" target="_blank" rel="noopener nofollow ugc" data-click="${e.id}">${esc(e.name)}</a>
-          <div class="meta">@${esc(e.handle)} ${verMark(e)} ${fnd(e)} ${net(e.platform)} <span class="tag">${CATS[e.cat] || ''}</span>
+          <div class="meta">@${esc(e.handle)} ${verMark(e)} ${fnd(e)} ${invTag(e)} ${net(e.platform)} <span class="tag">${CATS[e.cat] || ''}</span>
             ${niche && shown === 1 ? `<span class="tag" style="color:var(--gold-ink)">Rey de ${CATS[filter]}</span>` : ''}
             ${mine ? '<span class="you">Tú</span>' : ''}${e.me ? `<span class="mefan">${sub ? `Le apoyas · ${eur(sub.amount)}/mes` : `Le apoyas · ${eur(e.me.amount)}`}</span>` : ''}</div>
           ${fan1 || e.goal ? `<div class="fan1">${fan1 ? `Fan nº1: <b>${esc(fan1.nick)}</b>` : ''}${fan1 && e.goal ? ' · ' : ''}${e.goal ? `<span class="goalchip">Meta <b>${goalPct(e)} %</b></span>` : ''}</div>` : ''}
@@ -573,7 +575,7 @@ footer .demo{margin-left:auto}
           <button class="sbtn pri" data-support="${e.id}">Apoyar</button>
           <button class="sbtn" data-creator="${e.id}">Comunidad</button>
           ${mine ? `<button class="sbtn" data-topup="${e.id}">Subir mi puja</button><button class="sbtn" data-copylink="${e.id}">Copiar mi enlace</button>${e.verified || e.verifyRequested ? '' : `<button class="sbtn" data-verify="${e.id}">Verificar</button>`}`
-                 : i === 0 ? '' : `<button class="sbtn link" data-steal="${i}" aria-label="Quitarle el puesto ${i + 1} a ${esc(e.name)} por ${eur(t + 1)}">Soy creador: quitar puesto · ${eur(t + 1)}</button>`}
+                 : (i === 0 && hasKing()) ? '' : `<button class="sbtn link" data-steal="${i}" aria-label="Quitarle el puesto ${i + 1} a ${esc(e.name)} por ${eur(t + 1)}">Soy creador: quitar puesto · ${eur(t + 1)}</button>`}
         </div>
       </li>`;
     }).join('') || `<li class="row" style="display:block;color:var(--muted);padding:18px">${niche ? 'Nadie en este nicho todavía. El primero que entre será su rey.' : all.length ? 'Solo hay un creador en el ranking. Entra ahora y ponte justo detrás del rey.' : 'El ranking está vacío. Consigue tu puesto y estrena la temporada.'}</li>`;
@@ -871,15 +873,15 @@ footer .demo{margin-left:auto}
   const myAmtOf = e => e.me ? e.me.amount : 0;
 
   // ---------- puja de creador ----------
-  function openBid({ target, topUpId }) {
-    track('abre_puja');
+  function openBid({ target, topUpId, invite }) {
+    track(invite ? 'abre_invitacion' : 'abre_puja');
     const all = list();
     const me = topUpId ? byId(topUpId) : null;
     const form = { platform: 'tiktok', urlTouched: false, amount: MIN };
     if (target !== undefined && all[target]) form.amount = Math.max(MIN, total(all[target]) + 1);
     if (me) { const p = all.indexOf(me); form.amount = p > 0 ? Math.max(MIN, total(all[p - 1]) + 1 - total(me)) : 10; }
-    const title = me ? 'Subir tu puja' : target !== undefined ? `Quitar el puesto #${target + 1}` : 'Consigue tu puesto';
-    const lead = me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.' + (foundersLeft() > 0 ? ` <b style="color:var(--gold-ink)">Quedan ${foundersLeft()} plazas de Fundador:</b> si entras ahora, llevarás la insignia para siempre.` : '');
+    const title = invite ? 'Te han invitado: entra gratis' : me ? 'Subir tu puja' : target !== undefined ? `Quitar el puesto #${target + 1}` : 'Consigue tu puesto';
+    const lead = invite ? `Con esta invitación entras en el ranking sin pagar, con la etiqueta «Invitado». Tus seguidores podrán apoyarte desde el primer momento y, cuando quieras, puedes pujar para subir. <b style="color:var(--gold-ink)">Quedan ${invite.left} plazas en esta invitación.</b>` : me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.' + (foundersLeft() > 0 ? ` <b style="color:var(--gold-ink)">Quedan ${foundersLeft()} plazas de Fundador:</b> si entras ahora, llevarás la insignia para siempre.` : '');
 
     openSheet(`
       <h3 id="sheet-title">${title}</h3>
@@ -917,17 +919,22 @@ footer .demo{margin-left:auto}
           <input id="in-mail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
           <div class="hint">Opcional, pero es la mejor forma de enterarte a tiempo para recuperar tu puesto.</div>
           <div class="err" id="er-mail"></div></div>`}
-        ${amountField(form.amount, MIN, CREATOR_MAX, `Mínimo ${MIN} €.`)}
-        <div class="preview" id="preview" aria-live="polite"></div>
-        <button class="btn btn-primary full" type="submit">Continuar al pago</button>
+        ${invite ? `<label class="check"><input type="checkbox" id="inv-age"> <span>Tengo 18 años o más y acepto las normas del sitio.</span></label>
+          <div class="err" id="er-inv" style="font-size:13px;color:var(--alert);margin:-6px 0 12px" role="alert"></div>`
+          : `${amountField(form.amount, MIN, CREATOR_MAX, `Mínimo ${MIN} €.`)}
+        <div class="preview" id="preview" aria-live="polite"></div>`}
+        <button class="btn btn-primary full" type="submit">${invite ? 'Entrar gratis' : 'Continuar al pago'}</button>
       </form>`);
 
     const base = me ? total(me) : 0;
     const opts = all.slice(0, 5).map((e, i) => ({ i, e, need: Math.max(MIN, total(e) + 1 - base) })).filter(o => o.e !== me && total(o.e) >= base);
-    $('quick').innerHTML = opts.map(o => `<button type="button" data-a="${o.need}">#${o.i + 1} · ${eur(o.need)}</button>`).join('');
-    $('quick').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b) { $('in-amt').value = b.dataset.a; upd(); } });
+    if ($('quick')) {
+      $('quick').innerHTML = opts.map(o => `<button type="button" data-a="${o.need}">#${o.i + 1} · ${eur(o.need)}</button>`).join('');
+      $('quick').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b) { $('in-amt').value = b.dataset.a; upd(); } });
+    }
 
     function upd() {
+      if (!$('in-amt')) return;
       const a = Math.floor(+$('in-amt').value || 0);
       const t = base + a, p = positionFor(t, me && me.id);
       const cat = me ? me.cat : form.cat;
@@ -936,7 +943,7 @@ footer .demo{margin-left:auto}
         ? `Con ${eur(a)} ${me ? `sumas ${eur(t)} y ` : ''}quedas en el puesto <b>#${p}</b>${p === 1 ? ' · el trono es tuyo' : ''}${cat ? `<br>En ${CATS[cat]}: <b>#${np}</b>${np === 1 ? ` · rey de ${CATS[cat]}` : ''}` : ''}`
         : `Mínimo ${MIN} €`;
     }
-    $('in-amt').addEventListener('input', upd);
+    if ($('in-amt')) $('in-amt').addEventListener('input', upd);
 
     if (!me) {
       $('in-photo').addEventListener('change', async ev => {
@@ -988,9 +995,26 @@ footer .demo{margin-left:auto}
         const dup = list().find(x => x.platform === form.platform && x.handle.toLowerCase() === form.handle.toLowerCase());
         if (dup && !isMine(dup)) setErr('er-handle', 'Esta cuenta ya está en el ranking. Si es tuya y la registraste en otro dispositivo, escríbenos para recuperar el acceso.', 'in-handle');
       }
-      form.amount = Math.floor(+$('in-amt').value || 0);
-      setErr('er-amt', form.amount >= MIN && form.amount <= CREATOR_MAX ? '' : `Elige una cantidad entre ${MIN} y 10.000 €.`, 'in-amt');
+      if (!invite) {
+        form.amount = Math.floor(+$('in-amt').value || 0);
+        setErr('er-amt', form.amount >= MIN && form.amount <= CREATOR_MAX ? '' : `Elige una cantidad entre ${MIN} y 10.000 €.`, 'in-amt');
+      }
       if (first || catErr) { if (first) $(first).focus(); else sheet.querySelector('[data-cat]').focus(); return; }
+      if (invite) {
+        if (!$('inv-age').checked) { $('er-inv').textContent = 'Marca la casilla para confirmar que tienes 18 años o más.'; return; }
+        const btn = sheet.querySelector('#bidform button[type=submit]'); btn.disabled = true; btn.textContent = 'Entrando…';
+        api('/api/invite', { code: invite.code, adult: true, newCreator: { handle: form.handle, platform: form.platform, name: form.name, cat: form.cat, url: form.url, alertEmail: form.mail, photo: form.photo || '' } })
+          .then(async r => {
+            owned[r.creatorId] = r.ownerToken; LS.set('rr-owned', owned);
+            track('usa_invitacion');
+            history.replaceState(null, '', '/');
+            await load();
+            const e = byId(r.creatorId);
+            if (e) successSheet(e, posOf(e), 'creator', {}); else { closeSheet(); toast('¡Ya estás dentro del ranking!'); }
+          })
+          .catch(err => { $('er-inv').textContent = err.message; btn.disabled = false; btn.textContent = 'Entrar gratis'; });
+        return;
+      }
       const t = base + form.amount;
       paySheet({
         amount: form.amount,
@@ -1174,6 +1198,7 @@ footer .demo{margin-left:auto}
         'Las metas las fija cada creador y él es responsable de cumplirlas.',
         'Para el sello de verificado hay que poner en la bio el código que te damos. Las fotos deben ser tuyas: retiramos sin reembolso las de otras personas o con contenido inapropiado.',
         'Solo se admiten enlaces a perfiles o contenidos propios. Retiramos sin reembolso las cuentas que suplanten a otra persona y los enlaces a estafas, contenido adulto, odio o material de terceros.',
+        'Algunos creadores entran con una invitación gratuita: aparecen con la etiqueta «Invitado» y 0 €, sin ninguna ventaja en el orden del ranking.',
         'Los 10 primeros creadores que consiguen su puesto reciben la insignia de Fundador, que se queda en su perfil para siempre mientras la cuenta siga activa.',
         'Aportar no da derecho a ningún premio ni sorteo: es apoyo y visibilidad para el creador.'
       ]],
@@ -1243,7 +1268,15 @@ footer .demo{margin-left:auto}
   (async () => {
     try { await load(); }
     catch (e) { $('throne').innerHTML = `<p style="margin:0;color:var(--muted)">${esc(e.message)}</p>`; return; }
-    if (new URLSearchParams(location.search).get('pago')) await handleReturn(); else openFromPath();
+    const invCode = new URLSearchParams(location.search).get('invitacion');
+    if (new URLSearchParams(location.search).get('pago')) await handleReturn();
+    else if (invCode) {
+      try {
+        const r = await api('/api/invite?code=' + encodeURIComponent(invCode));
+        if (r.valid) openBid({ invite: { code: invCode, left: r.left } });
+        else toast('Esta invitación ya no es válida: se han usado todas sus plazas o ha caducado.', true);
+      } catch (e) { toast('No se pudo comprobar la invitación. Recarga la página.', true); }
+    } else openFromPath();
     setInterval(() => {
       if (document.visibilityState === 'visible' && !scrim.classList.contains('open')) load().catch(() => {});
     }, 30000);

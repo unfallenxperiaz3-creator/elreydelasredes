@@ -80,6 +80,8 @@ a{color:var(--gold)}
 
       ${visitsHTML(d)}
 
+      ${invitesHTML(d)}
+
       <h2>Verificaciones pendientes (${pending.length})</h2>
       ${pending.length ? `<div class="table"><table><tr><th>Cuenta</th><th>Código que debe tener en la bio</th><th>Pedido</th><th></th></tr>
         ${pending.map(c => `<tr><td><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.platform)} · @${esc(c.handle)}</a></td><td><b>${esc(c.verify_code)}</b></td><td>${fmt(c.verify_requested_at)}</td>
@@ -107,6 +109,42 @@ a{color:var(--gold)}
         ${d.payments.map(p => `<tr><td>${fmt(p.created_at)}</td><td>${p.kind === 'bid' ? 'Puja' : p.monthly ? 'Apoyo mensual' : 'Apoyo'}</td><td>${esc(names[p.creator_id] || '—')}</td><td>${esc(p.nick || '')}</td><td>${eur(p.amount_cents)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Aún no hay pagos.</td></tr>'}
       </table></div>`;
   }
+
+  function invitesHTML(d) {
+    if (d.invites === null) return `<h2>Invitaciones gratis</h2><p class="muted">Falta activarlas: en Supabase → SQL Editor, ejecuta el bloque «Invitaciones gratis» del archivo supabase/schema.sql.</p>`;
+    const base = location.origin + '/?invitacion=';
+    const now = Date.now();
+    return `<h2>Invitaciones gratis</h2>
+      <p class="muted" style="font-size:13px;margin-top:0">Crea un enlace para que creadores que tú elijas entren sin pagar. Aparecerán con 0 € y la etiqueta «Invitado». Cada enlace sirve para un número máximo de personas y caduca.</p>
+      <form id="inv-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <input id="inv-note" placeholder="Para quién (solo lo ves tú)" maxlength="60" style="flex:1 1 220px">
+        <label class="muted" style="font-size:13px">Personas <input id="inv-max" type="number" min="1" max="100" value="5" style="width:70px"></label>
+        <label class="muted" style="font-size:13px">Días <input id="inv-days" type="number" min="1" max="90" value="7" style="width:70px"></label>
+        <button class="pri" type="submit">Crear enlace</button>
+      </form>
+      <div class="table"><table><tr><th>Enlace</th><th>Para</th><th>Usos</th><th>Caduca</th><th></th></tr>
+        ${d.invites.map(i => { const exp = i.expires_at && new Date(i.expires_at).getTime() <= now; const full = i.uses >= i.max_uses; const ok = !exp && !full;
+          return `<tr><td style="white-space:normal;word-break:break-all"><code>${esc(base + i.code)}</code></td><td>${esc(i.note || '')}</td><td>${i.uses} / ${i.max_uses}</td>
+          <td>${ok ? fmt(i.expires_at) : `<span class="pill no">${full ? 'Agotado' : 'Caducado'}</span>`}</td>
+          <td><div class="acts">${ok ? `<button data-copy="${esc(base + i.code)}">Copiar</button><button class="danger" data-close="${esc(i.code)}">Desactivar</button>` : ''}</div></td></tr>`; }).join('') || '<tr><td colspan="5" class="muted">Aún no has creado ninguna invitación.</td></tr>'}
+      </table></div>`;
+  }
+  document.addEventListener('submit', async ev => {
+    if (ev.target.id !== 'inv-form') return;
+    ev.preventDefault();
+    try {
+      const r = await call('POST', { action: 'createInvite', note: $('inv-note').value, maxUses: $('inv-max').value, days: $('inv-days').value });
+      await load();
+      const link = location.origin + '/?invitacion=' + r.code;
+      try { await navigator.clipboard.writeText(link); $('msg').textContent = 'Enlace creado y copiado: ' + link; } catch (e) { $('msg').textContent = 'Enlace creado: ' + link; }
+    } catch (e) { $('msg').textContent = e.message; }
+  });
+  document.addEventListener('click', async ev => {
+    const c = ev.target.closest('button[data-copy]');
+    if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); c.textContent = 'Copiado'; } catch (e) { $('msg').textContent = c.dataset.copy; } return; }
+    const x = ev.target.closest('button[data-close]');
+    if (x) { if (!confirmInline(x)) return; try { await call('POST', { action: 'closeInvite', code: x.dataset.close }); await load(); } catch (e) { $('msg').textContent = e.message; } }
+  });
 
   const SRC = { tiktok: 'TikTok', instagram: 'Instagram', google: 'Google', directo: 'Directo o app', otros: 'Otras webs' };
   function visitsHTML(d) {

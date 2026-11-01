@@ -157,3 +157,26 @@ begin
       on conflict (creator_id, season) do update set n = season_clicks.n + 1;
   end if;
 end $$;
+
+-- ===== Invitaciones gratis (añadido después; se puede ejecutar solo este bloque) =====
+alter table creators add column if not exists invited_at timestamptz;
+alter table creators add column if not exists invited_season text;
+alter table creators add column if not exists invite_code text;
+
+create table if not exists invites (
+  code text primary key,
+  note text,
+  max_uses integer not null default 5,
+  uses integer not null default 0,
+  expires_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table invites enable row level security;
+
+-- Gasta un uso de la invitación solo si quedan usos y no ha caducado
+create or replace function use_invite(c text) returns boolean language plpgsql as $$
+begin
+  update invites set uses = uses + 1
+   where code = c and uses < max_uses and (expires_at is null or expires_at > now());
+  return found;
+end $$;
