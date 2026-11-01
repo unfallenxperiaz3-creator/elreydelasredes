@@ -771,7 +771,7 @@ footer .demo{margin-left:auto}
 
       ${mine ? `<div class="cs-sec"><h4>Tu cuenta</h4>
         <div class="acts" style="margin-bottom:10px">
-          <label class="btn btn-outline" for="cs-photo" style="cursor:pointer">Cambiar foto</label><input id="cs-photo" type="file" accept="image/*" style="position:absolute;left:-9999px">
+          <label class="btn btn-outline" for="cs-photo" style="cursor:pointer">Cambiar foto o icono</label><input id="cs-photo" type="file" accept="image/*" style="position:absolute;left:-9999px">
           <button class="btn btn-outline" data-copylink="${e.id}">Copiar mi enlace de apoyo</button>
           ${e.verified ? '' : `<button class="btn btn-outline" data-verify="${e.id}">${e.verifyRequested ? 'Verificación pendiente' : 'Verificar mi cuenta'}</button>`}
         </div>
@@ -917,13 +917,13 @@ footer .demo{margin-left:auto}
           <input id="in-url" type="url" inputmode="url" placeholder="https://…" autocapitalize="off" spellcheck="false">
           <div class="hint">Se rellena con tu perfil. Puedes cambiarlo por un vídeo concreto.</div>
           <div class="err" id="er-url"></div></div>
-        <div class="field"><span class="lbl">Tu foto en el ranking (opcional)</span>
+        <div class="field"><span class="lbl">Añade la foto o icono de tu canal (opcional)</span>
           <div class="photo">
             <span class="ph" id="ph-prev">Sin foto</span>
-            <label class="btn btn-outline" for="in-photo">Subir foto</label>
+            <label class="btn btn-outline" for="in-photo">Subir imagen</label>
             <input id="in-photo" type="file" accept="image/*">
           </div>
-          <div class="hint">Sale en tu fila del ranking. Para el sello de verificado te daremos un código para tu bio.</div>
+          <div class="hint">Usa la misma imagen de perfil que tienes en tu red, para que tus seguidores te reconozcan al momento. Sale en tu fila del ranking.</div>
           <div class="err" id="er-photo"></div></div>
         <div class="field"><label for="in-mail">Email para avisarte si te superan</label>
           <input id="in-mail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
