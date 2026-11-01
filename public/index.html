@@ -1190,6 +1190,24 @@ footer .demo{margin-left:auto}
     if (e) openSupport(e.id, false); else toast(`@${m[1]} no está en el ranking esta temporada`);
   }
 
+  // ---------- contador de visitas (anónimo, sin cookies) ----------
+  function countVisit() {
+    if (LS.get('rr-notrack', false)) return;           // el dueño puede excluir sus propias visitas desde /admin
+    const q = new URLSearchParams(location.search);
+    let src = (q.get('r') || '').toLowerCase();
+    if (!src) {
+      let host = '';
+      try { host = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+      src = /tiktok/.test(host) ? 'tiktok' : /instagram|ig\.me/.test(host) ? 'instagram'
+        : /google\./.test(host) ? 'google' : !host || host === location.hostname ? 'directo' : 'otros';
+    }
+    const day = new Date().toISOString().slice(0, 10);
+    const unique = !LS.get('rr-v-' + day, false);
+    LS.set('rr-v-' + day, true);
+    fetch('/api/visit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ src, unique }), keepalive: true }).catch(() => {});
+  }
+  if (!new URLSearchParams(location.search).get('pago')) countVisit();
+
   // ---------- arranque ----------
   (async () => {
     try { await load(); }

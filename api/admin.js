@@ -1,5 +1,5 @@
 // Panel de administrador. Protegido con la contraseña ADMIN_PASSWORD.
-import { db, json, fail, readJson, safeEqual, newToken, seasonKey } from '../lib/core.js';
+import { db, json, fail, readJson, safeEqual, newToken, seasonKey, madridDay } from '../lib/core.js';
 
 function allowed(request) {
   return !!process.env.ADMIN_PASSWORD && safeEqual(request.headers.get('x-admin-password') || '', process.env.ADMIN_PASSWORD);
@@ -7,11 +7,13 @@ function allowed(request) {
 
 export async function GET(request) {
   if (!allowed(request)) return fail('Contraseña incorrecta.', 401);
-  const [creators, payments, waitlist, subs] = await Promise.all([
+  const since = madridDay(new Date(Date.now() - 13 * 86400000));
+  const [creators, payments, waitlist, subs, visits] = await Promise.all([
     db().from('creators').select('id,name,handle,platform,url,photo_url,verified,verify_code,verify_requested_at,hidden,clicks,created_at').order('created_at', { ascending: false }).limit(500),
     db().from('payments').select('id,creator_id,kind,amount_cents,nick,monthly,season,created_at').order('created_at', { ascending: false }).limit(100),
     db().from('waitlist').select('email', { count: 'exact', head: true }),
-    db().from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active')
+    db().from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    db().from('visits_daily').select('day,source,views,uniques').gte('day', since).order('day', { ascending: false })
   ]);
   for (const r of [creators, payments]) if (r.error) return fail(r.error.message, 500);
   const season = seasonKey();
@@ -19,7 +21,8 @@ export async function GET(request) {
   return json({
     season, seasonTotalShown: seasonTotal / 100,
     creators: creators.data, payments: payments.data,
-    waitlist: waitlist.count || 0, activeSubs: subs.count || 0
+    waitlist: waitlist.count || 0, activeSubs: subs.count || 0,
+    today: madridDay(), visits: visits.error ? null : visits.data
   });
 }
 

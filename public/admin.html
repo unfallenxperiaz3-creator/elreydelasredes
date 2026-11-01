@@ -8,6 +8,7 @@
 <style>
 :root{--bg:#0b0b0c;--surface:#141416;--ink:#f3ede0;--muted:#9a9488;--line:#2a2824;--gold:#c9a24a;--alert:#e05252;--ok:#3fae6b;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 .wrap{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
 h1{font-family:Georgia,serif;font-weight:400;font-size:30px;margin:0 0 4px}
@@ -78,6 +79,8 @@ a{color:var(--gold)}
       </div>
       <p class="muted" style="font-size:12px">* De los últimos 100 pagos. El dato exacto, con comisiones, está en tu panel de Stripe.</p>
 
+      ${visitsHTML(d)}
+
       <h2>Verificaciones pendientes (${pending.length})</h2>
       ${pending.length ? `<div class="table"><table><tr><th>Cuenta</th><th>Código que debe tener en la bio</th><th>Pedido</th><th></th></tr>
         ${pending.map(c => `<tr><td><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.platform)} · @${esc(c.handle)}</a></td><td><b>${esc(c.verify_code)}</b></td><td>${fmt(c.verify_requested_at)}</td>
@@ -105,6 +108,32 @@ a{color:var(--gold)}
         ${d.payments.map(p => `<tr><td>${fmt(p.created_at)}</td><td>${p.kind === 'bid' ? 'Puja' : p.monthly ? 'Apoyo mensual' : 'Apoyo'}</td><td>${esc(names[p.creator_id] || '—')}</td><td>${esc(p.nick || '')}</td><td>${eur(p.amount_cents)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Aún no hay pagos.</td></tr>'}
       </table></div>`;
   }
+
+  const SRC = { tiktok: 'TikTok', instagram: 'Instagram', google: 'Google', directo: 'Directo o app', otros: 'Otras webs' };
+  function visitsHTML(d) {
+    if (d.visits === null) return `<h2>Visitas</h2><p class="muted">Falta activar el contador: en Supabase → SQL Editor, ejecuta el bloque «Contador de visitas» del archivo supabase/schema.sql.</p>`;
+    const days = (n) => { const t = new Date(d.today + 'T12:00:00'); t.setDate(t.getDate() - n); return t.toISOString().slice(0, 10); };
+    const sum = (rows, k) => rows.reduce((s, r) => s + r[k], 0);
+    const todayRows = d.visits.filter(v => v.day === d.today), weekRows = d.visits.filter(v => v.day >= days(6));
+    const bySrc = rows => { const m = {}; rows.forEach(r => { m[r.source] = m[r.source] || { views: 0, uniques: 0 }; m[r.source].views += r.views; m[r.source].uniques += r.uniques; }); return Object.entries(m).sort((a, b) => b[1].uniques - a[1].uniques); };
+    const perDay = []; for (let i = 0; i < 14; i++) { const day = days(i), rows = d.visits.filter(v => v.day === day); perDay.push([day, sum(rows, 'uniques'), sum(rows, 'views')]); }
+    const max = Math.max(1, ...perDay.map(p => p[1]));
+    const noTrack = localStorage.getItem('rr-notrack') === 'true';
+    return `<h2>Visitas</h2>
+      <div class="cards">
+        <div class="card"><span class="muted">Personas hoy</span><b>${sum(todayRows, 'uniques')}</b><span class="muted" style="font-size:12px">${sum(todayRows, 'views')} visitas a la página</span></div>
+        <div class="card"><span class="muted">Personas últimos 7 días</span><b>${sum(weekRows, 'uniques')}</b><span class="muted" style="font-size:12px">${sum(weekRows, 'views')} visitas a la página</span></div>
+      </div>
+      <div class="table" style="margin-top:10px"><table><tr><th>De dónde vienen (7 días)</th><th>Personas</th><th>Visitas</th></tr>
+        ${bySrc(weekRows).map(([k, v]) => `<tr><td>${esc(SRC[k] || k)}</td><td>${v.uniques}</td><td>${v.views}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">Aún no hay visitas registradas.</td></tr>'}
+      </table></div>
+      <div class="table" style="margin-top:10px"><table><tr><th>Día</th><th>Personas</th><th></th></tr>
+        ${perDay.map(([day, u]) => `<tr><td>${day.split('-').reverse().slice(0, 2).join('/')}</td><td>${u}</td><td style="width:60%"><div style="height:8px;border-radius:4px;background:var(--gold);width:${Math.round(u / max * 100)}%"></div></td></tr>`).join('')}
+      </table></div>
+      <p class="muted" style="font-size:13px">«Personas» cuenta cada navegador una vez al día. «Directo o app» incluye a quien entra desde la app de TikTok o Instagram, porque esas apps no siempre dicen de dónde viene la visita. Para distinguirlo, comparte el enlace como <b>elreydelasredes.es/?r=tiktok</b> o <b>?r=instagram</b>.</p>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="notrack" ${noTrack ? 'checked' : ''}> No contar mis propias visitas desde este navegador</label>`;
+  }
+  document.addEventListener('change', ev => { if (ev.target.id === 'notrack') { localStorage.setItem('rr-notrack', ev.target.checked ? 'true' : 'false'); $('msg').textContent = ev.target.checked ? 'Tus visitas desde este navegador ya no se cuentan.' : 'Tus visitas vuelven a contarse.'; } });
 
   $('login').addEventListener('submit', async ev => {
     ev.preventDefault(); pw = $('pw').value;

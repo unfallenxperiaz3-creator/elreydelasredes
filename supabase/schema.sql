@@ -112,3 +112,20 @@ alter table waitlist enable row level security;
 insert into storage.buckets (id, name, public)
 values ('photos', 'photos', true)
 on conflict (id) do nothing;
+
+-- ===== Contador de visitas (añadido después; se puede ejecutar solo este bloque) =====
+create table if not exists visits_daily (
+  day date not null,
+  source text not null,
+  views integer not null default 0,
+  uniques integer not null default 0,
+  primary key (day, source)
+);
+alter table visits_daily enable row level security;
+
+create or replace function add_visit(d date, s text, u boolean) returns void language sql as $$
+  insert into visits_daily (day, source, views, uniques) values (d, s, 1, case when u then 1 else 0 end)
+  on conflict (day, source) do update
+    set views = visits_daily.views + 1,
+        uniques = visits_daily.uniques + (case when u then 1 else 0 end);
+$$;
