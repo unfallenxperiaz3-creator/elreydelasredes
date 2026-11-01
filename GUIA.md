@@ -1,111 +1,92 @@
 # El Rey de las Redes · Guía de puesta en marcha
 
-Sigue los pasos en orden. Todo se hace desde el navegador; no hace falta instalar nada.
+La web se aloja gratis en **Netlify** (su plan gratuito permite cobrar), con la base de datos en **Supabase** y los pagos en **Stripe**.
 
-> **Nunca pegues tus claves secretas en un chat, en un mensaje ni en el código.** Solo van en Vercel, en *Environment Variables*.
+> **Nunca pegues tus claves secretas en un chat, en un mensaje ni en el código.** Solo van en Netlify, en *Environment variables*.
 
 ---
 
 ## 1. Base de datos (Supabase)
 
-1. Entra en tu proyecto de Supabase → **SQL Editor** → **New query**.
-2. Pega todo el contenido de `supabase/schema.sql` y pulsa **Run**. Debe salir *Success*.
-3. Ve a **Project Settings → API Keys** (o **Data API**) y apunta en un sitio privado:
-   - **Project URL** (empieza por `https://` y acaba en `.supabase.co`).
-   - La clave **secreta**: se llama `service_role` o *secret key* (empieza por `eyJ…` o por `sb_secret_…`). **No es la clave anon/publishable.**
+1. Supabase → **SQL Editor** → **New query** → pega todo `supabase/schema.sql` → **Run** (debe salir *Success*).
+2. **Project Settings → API Keys**: apunta en privado la **Project URL** (`https://xxxx.supabase.co`) y una **Secret key** (`sb_secret_…`). No uses la *anon* ni la *publishable*.
 
-## 2. Claves de Stripe (en modo de prueba)
+## 2. Publicar la web (Netlify)
 
-1. En Stripe activa **Test mode**.
-2. **Developers → API keys** → copia la **Secret key** (empieza por `sk_test_…`).
+1. Entra en netlify.com con tu cuenta de GitHub → **Add new project → Import an existing project → GitHub** → elige `elreydelasredes`.
+2. No cambies nada de la configuración de compilación (ya está en `netlify.toml`) y pulsa **Deploy**.
+3. **Project configuration → Environment variables → Add a variable** y añade:
 
-## 3. Publicar la web (Vercel)
-
-1. En Vercel: **Add New… → Project** → importa el repositorio `elreydelasredes`.
-2. *Framework Preset*: **Other**. No toques nada más.
-3. Abre **Environment Variables** y añade estas, una por una:
-
-| Nombre | Valor |
+| Key | Value |
 |---|---|
 | `SUPABASE_URL` | La Project URL de Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | La clave secreta de Supabase |
-| `STRIPE_SECRET_KEY` | `sk_test_…` de Stripe |
-| `STRIPE_WEBHOOK_SECRET` | De momento pon `pendiente` (lo cambias en el paso 4) |
-| `ADMIN_PASSWORD` | Una contraseña larga inventada por ti para el panel de administrador |
-| `CRON_SECRET` | Cualquier texto largo y aleatorio (por ejemplo 40 letras y números) |
-| `LEGAL_NAME` | Tu nombre o nombre comercial (para el aviso legal) |
+| `SUPABASE_SERVICE_ROLE_KEY` | La Secret key de Supabase (`sb_secret_…`) |
+| `STRIPE_SECRET_KEY` | `sk_test_…` para pruebas; `sk_live_…` para cobrar de verdad |
+| `STRIPE_WEBHOOK_SECRET` | El `whsec_…` del destino de eventos de Stripe |
+| `ADMIN_PASSWORD` | Contraseña inventada para el panel `/admin` |
+| `SITE_URL` | `https://www.elreydelasredes.es` |
+| `LEGAL_NAME` | Tu nombre o nombre comercial |
 | `LEGAL_NIF` | Tu NIF |
 | `LEGAL_EMAIL` | Tu email de contacto |
 
-4. Pulsa **Deploy**. Al terminar tendrás una dirección tipo `https://elreydelasredes.vercel.app`.
+4. **Deploys → Trigger deploy → Deploy site** para que se apliquen. (Siempre que cambies una variable, vuelve a desplegar.)
 
-## 4. Avisos de pago (webhook de Stripe)
+## 3. Dominio
 
-Es lo que hace que el ranking se actualice solo cuando alguien paga.
+1. Netlify → **Domain management → Add a domain** → `www.elreydelasredes.es` (y acepta añadir también `elreydelasredes.es`).
+2. Netlify te dirá qué poner en tu proveedor (Nominalia → *Editar zona DNS*). Normalmente:
+   - Registro **A** de `elreydelasredes.es` → la IP que indique Netlify.
+   - Registro **CNAME** de `www` → `TU-SITIO.netlify.app`
+3. No toques los registros del correo (MX, TXT, SRV, `autoconfig`, `pop`, `_domainkey`…).
+4. Netlify activa el certificado HTTPS solo cuando los DNS apuntan bien (puede tardar un rato).
 
-1. En Stripe (modo de prueba): **Developers → Webhooks → Add endpoint** (o *Add destination*).
-2. **URL**: `https://TU-DIRECCION.vercel.app/api/webhook`
-3. **Eventos** (marca estos 4):
-   - `checkout.session.completed`
-   - `checkout.session.async_payment_succeeded`
-   - `invoice.paid`
-   - `customer.subscription.deleted`
-4. Guarda y copia el **Signing secret** (empieza por `whsec_…`).
-5. En Vercel → tu proyecto → **Settings → Environment Variables** → cambia `STRIPE_WEBHOOK_SECRET` por ese `whsec_…`.
-6. **Deployments** → en el último, menú **⋯ → Redeploy**. (Siempre que cambies una variable hay que redesplegar.)
+## 4. Avisos de pago (Stripe)
 
-## 5. Prueba completa
+1. Stripe → **Webhooks / Destinos de eventos → Añade un destino** → *Tu cuenta* → eventos:
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `customer.subscription.deleted` → *Punto de conexión de webhook*.
+2. URL: `https://www.elreydelasredes.es/api/webhook` (con www: Stripe no sigue redirecciones).
+3. Copia su **clave secreta de firma** (`whsec_…`) en `STRIPE_WEBHOOK_SECRET` y vuelve a desplegar.
 
-1. Abre tu web y pulsa **Soy creador: conseguir mi puesto**.
-2. Rellena los datos y paga con la tarjeta de prueba de Stripe:
-   - Número `4242 4242 4242 4242`, cualquier fecha futura, cualquier CVC y cualquier código postal.
-3. Al volver a la web debes aparecer en el trono en unos segundos.
-4. Prueba también **Apoyar** (una vez y cada mes) desde otro navegador o en modo incógnito.
-5. Entra en `https://TU-DIRECCION.vercel.app/admin` con tu `ADMIN_PASSWORD`: verás los pagos y podrás aprobar verificaciones.
+En **modo de prueba** y en **modo real** son destinos distintos, cada uno con su `whsec_…`.
 
-Si algo falla: en Stripe → Webhooks → tu endpoint verás si los avisos llegan (en verde) o fallan (en rojo, con el motivo). En Vercel → **Logs** verás los errores del servidor.
+## 5. Prueba
 
-## 6. Tu dominio
+1. En la web, **Soy creador: conseguir mi puesto** → paga con la tarjeta de prueba `4242 4242 4242 4242` (cualquier fecha futura y CVC).
+2. Debes aparecer en el trono en unos segundos. En `/admin` (con tu `ADMIN_PASSWORD`) verás el pago.
+3. Si no aparece: Stripe → tu destino → *Entregas de eventos* (en rojo verás el motivo). En Netlify → **Logs → Functions** verás los errores del servidor.
 
-1. Vercel → proyecto → **Settings → Domains** → añade `elreydelasredes.es` (Vercel deja `www.elreydelasredes.es` como principal) y pon en Nominalia, en *Editar zona DNS*, los registros que te da: un **A** para `@` y un **CNAME** para `www`. No toques los registros del correo (MX, TXT, SRV…).
-2. Cuando funcione, añade la variable `SITE_URL` = `https://www.elreydelasredes.es` y redespliega.
-3. En Stripe, edita el webhook y cambia la URL a `https://www.elreydelasredes.es/api/webhook` (con www: Stripe no sigue redirecciones).
+## 6. Cobrar dinero real
 
-## 7. Cobrar dinero real
+1. Stripe sin modo de prueba: copia la `sk_live_…` en `STRIPE_SECRET_KEY`.
+2. Crea el destino de eventos en modo real (paso 4) y pon su `whsec_…` en `STRIPE_WEBHOOK_SECRET`.
+3. Vuelve a desplegar y haz un pago real pequeño para comprobarlo.
+4. Borra los datos de prueba: Supabase → SQL Editor →
+   `truncate payments, subscriptions, duels, king_log, hall, creators restart identity cascade;`
 
-Cuando todo funcione en pruebas:
+## 7. Opcional: emails de «te han superado»
 
-1. **Pasa Vercel al plan Pro.** El plan gratuito (Hobby) solo permite uso personal y no comercial; una web que cobra necesita el plan Pro (unos 20 $/mes).
-2. En Stripe desactiva **Test mode**.
-3. Copia la **Secret key real** (`sk_live_…`) y cámbiala en Vercel (`STRIPE_SECRET_KEY`).
-4. Crea **otro webhook** en modo real con la misma URL y los mismos 4 eventos, y pon su nuevo `whsec_…` en `STRIPE_WEBHOOK_SECRET`.
-5. Redespliega.
-
-Los pagos de prueba no aparecen en modo real: el ranking real empieza vacío.
-
-## 8. Opcional: emails de «te han superado»
-
-1. Crea una cuenta en resend.com y verifica tu dominio.
-2. Añade en Vercel `RESEND_API_KEY` (tu clave de Resend) y `MAIL_FROM` (por ejemplo `El Rey de las Redes <avisos@elreydelasredes.es>`).
-3. Redespliega. Desde ese momento, los creadores que dejen su email recibirán un aviso cuando alguien les adelante.
+Crea una cuenta en resend.com, verifica tu dominio y añade `RESEND_API_KEY` y `MAIL_FROM` (por ejemplo `El Rey de las Redes <avisos@elreydelasredes.es>`). Vuelve a desplegar.
 
 ---
 
 ## Día a día
 
-- **Verificaciones**: entra en `/admin`, abre el perfil del creador, comprueba que el código `REY-XXXX` está en su bio y pulsa **Aprobar**.
-- **Contenido inapropiado**: en `/admin` puedes **Ocultar** un creador o **Quitar foto**.
-- **Alguien perdió el acceso a su cuenta** (cambió de móvil): comprueba que es el dueño real (por ejemplo, que te escriba desde esa cuenta), pulsa **Nuevo acceso** en `/admin` y mándale el código. Lo pega en la web en *Recuperar acceso de creador* (abajo del todo).
-- **Cierre de temporada**: automático. Cada lunes a las 00:00 (hora de Madrid) empieza un ranking nuevo, y durante la madrugada el rey de la semana anterior entra en el salón de reyes.
-- **Dinero**: Stripe te lo transfiere al banco automáticamente. Las facturas tienes que hacerlas con un programa de facturación compatible con Verifactu; pregunta a tu gestor.
+- **Verificaciones**: `/admin` → abre el perfil, comprueba el código `REY-XXXX` en su bio → **Aprobar**.
+- **Contenido inapropiado**: `/admin` → **Ocultar** o **Quitar foto**.
+- **Alguien perdió el acceso** (cambió de móvil): comprueba que es el dueño real → **Nuevo acceso** en `/admin` → mándale el código; lo pega en la web en *Recuperar acceso de creador*.
+- **Temporadas**: automáticas. Cada lunes a las 00:00 (Madrid) empieza un ranking nuevo y de madrugada el rey anterior entra en el salón de reyes.
+- **Dinero**: Stripe te lo transfiere al banco automáticamente. Las facturas, con un programa compatible con Verifactu.
+- **Uso del plan gratuito**: Netlify tiene un límite mensual de uso en su plan gratuito. Revisa de vez en cuando *Usage* en Netlify; si la web crece mucho, ese será el momento de valorar un plan de pago.
 
 ## Estructura del proyecto
 
 ```
-public/index.html     La web
-public/admin.html     Panel de administrador
-api/                  Servidor (pagos, ranking, duelos, administración)
-lib/                  Lógica compartida
-supabase/schema.sql   Tablas de la base de datos
-vercel.json           Rutas (/@usuario, /admin) y tarea diaria de cierre de temporada
+public/index.html      La web
+public/admin.html      Panel de administrador
+api/                   Lógica de cada endpoint (pagos, ranking, duelos, admin)
+netlify/functions/     Puente para Netlify (reutiliza api/)
+lib/                   Lógica compartida
+supabase/schema.sql    Tablas de la base de datos
+netlify.toml           Rutas (/api, /admin, /@usuario) para Netlify
+vercel.json            Configuración alternativa si algún día usas Vercel
 ```

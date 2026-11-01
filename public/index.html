@@ -1223,7 +1223,7 @@ footer .demo{margin-left:auto}
     if (new URLSearchParams(location.search).get('pago')) await handleReturn(); else openFromPath();
     setInterval(() => {
       if (document.visibilityState === 'visible' && !scrim.classList.contains('open')) load().catch(() => {});
-    }, 15000);
+    }, 30000);
   })();
 })();
 </script>

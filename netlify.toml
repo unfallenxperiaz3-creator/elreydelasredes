@@ -1,0 +1,25 @@
+# Configuración para Netlify (plan gratuito, permite uso comercial)
+[build]
+  publish = "public"
+  command = "echo 'Sin compilación'"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# La API: /api/state -> función "state", etc.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+# Enlaces de apoyo /@usuario y cualquier otra ruta: la web
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
