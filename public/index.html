@@ -807,6 +807,7 @@ footer .demo{margin-left:auto}
 
   // ---------- apoyo de fans ----------
   function openSupport(id, monthly) {
+    track('abre_apoyo');
     const e = byId(id); if (!e) return;
     const all = list(), p = all.indexOf(e);
     const above = p > 0 ? all[p - 1] : null;
@@ -871,6 +872,7 @@ footer .demo{margin-left:auto}
 
   // ---------- puja de creador ----------
   function openBid({ target, topUpId }) {
+    track('abre_puja');
     const all = list();
     const me = topUpId ? byId(topUpId) : null;
     const form = { platform: 'tiktok', urlTouched: false, amount: MIN };
@@ -1057,6 +1059,7 @@ footer .demo{margin-left:auto}
     $('age').addEventListener('change', e => { $('paybtn').disabled = !e.target.checked; });
     $('paybtn').addEventListener('click', async e => {
       const b = e.currentTarget; b.disabled = true; const label = b.textContent; b.textContent = 'Abriendo el pago seguro…';
+      track('va_a_pagar');
       try { await pay(); }
       catch (err) { $('pay-err').textContent = err.message; b.disabled = false; b.textContent = label; }
     });
@@ -1069,7 +1072,7 @@ footer .demo{margin-left:auto}
     const state = q.get('pago');
     if (!state) return;
     history.replaceState(null, '', location.pathname === '/index.html' ? '/' : location.pathname);
-    if (state === 'cancelado') { toast('Pago cancelado. No se ha cobrado nada.'); return; }
+    if (state === 'cancelado') { track('cancela_pago'); toast('Pago cancelado. No se ha cobrado nada.'); return; }
     const sid = q.get('sid');
     if (state !== 'ok' || !sid) return;
     openSheet('<h3 id="sheet-title">Confirmando tu pago…</h3><p class="lead">Un momento, estamos esperando la confirmación de Stripe.</p>');
@@ -1212,6 +1215,13 @@ footer .demo{margin-left:auto}
   }
 
   // ---------- contador de visitas (anónimo, sin cookies) ----------
+  // Embudo: cuenta (una vez al día por navegador) cuántos dan cada paso. Anónimo.
+  function track(ev) {
+    if (LS.get('rr-notrack', false)) return;
+    const k = 'rr-e-' + ev + '-' + new Date().toISOString().slice(0, 10);
+    const unique = !LS.get(k, false); LS.set(k, true);
+    fetch('/api/visit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ src: 'ev_' + ev, unique }), keepalive: true }).catch(() => {});
+  }
   function countVisit() {
     if (LS.get('rr-notrack', false)) return;           // el dueño puede excluir sus propias visitas desde /admin
     const q = new URLSearchParams(location.search);

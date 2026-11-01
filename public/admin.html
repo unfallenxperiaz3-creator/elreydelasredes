@@ -113,6 +113,9 @@ a{color:var(--gold)}
     if (d.visits === null) return `<h2>Visitas</h2><p class="muted">Falta activar el contador: en Supabase → SQL Editor, ejecuta el bloque «Contador de visitas» del archivo supabase/schema.sql.</p>`;
     const days = (n) => { const t = new Date(d.today + 'T12:00:00'); t.setDate(t.getDate() - n); return t.toISOString().slice(0, 10); };
     const sum = (rows, k) => rows.reduce((s, r) => s + r[k], 0);
+    const evRows = d.visits.filter(v => v.source.startsWith('ev_') && v.day >= days(6));
+    const ev = name => evRows.filter(v => v.source === 'ev_' + name).reduce((s, r) => s + r.uniques, 0);
+    d = { ...d, visits: d.visits.filter(v => !v.source.startsWith('ev_')) };
     const todayRows = d.visits.filter(v => v.day === d.today), weekRows = d.visits.filter(v => v.day >= days(6));
     const bySrc = rows => { const m = {}; rows.forEach(r => { m[r.source] = m[r.source] || { views: 0, uniques: 0 }; m[r.source].views += r.views; m[r.source].uniques += r.uniques; }); return Object.entries(m).sort((a, b) => b[1].uniques - a[1].uniques); };
     const perDay = []; for (let i = 0; i < 14; i++) { const day = days(i), rows = d.visits.filter(v => v.day === day); perDay.push([day, sum(rows, 'uniques'), sum(rows, 'views')]); }
@@ -123,6 +126,10 @@ a{color:var(--gold)}
         <div class="card"><span class="muted">Personas hoy</span><b>${sum(todayRows, 'uniques')}</b><span class="muted" style="font-size:12px">${sum(todayRows, 'views')} visitas a la página</span></div>
         <div class="card"><span class="muted">Personas últimos 7 días</span><b>${sum(weekRows, 'uniques')}</b><span class="muted" style="font-size:12px">${sum(weekRows, 'views')} visitas a la página</span></div>
       </div>
+      <div class="table" style="margin-top:10px"><table><tr><th>Embudo (7 días)</th><th>Personas</th><th></th></tr>
+        ${[['Entran en la web', sum(weekRows, 'uniques')], ['Abren el formulario de creador', ev('abre_puja')], ['Abren el formulario de apoyo', ev('abre_apoyo')], ['Pulsan «Pagar» y van a Stripe', ev('va_a_pagar')], ['Cancelan en Stripe', ev('cancela_pago')], ['Pagan', d.payments.filter(p => p.created_at >= days(6)).length]]
+          .map(([t, n]) => `<tr><td>${t}</td><td>${n}</td><td style="width:45%"><div style="height:8px;border-radius:4px;background:var(--gold);width:${Math.round(n / Math.max(1, sum(weekRows, 'uniques')) * 100)}%"></div></td></tr>`).join('')}
+      </table></div>
       <div class="table" style="margin-top:10px"><table><tr><th>De dónde vienen (7 días)</th><th>Personas</th><th>Visitas</th></tr>
         ${bySrc(weekRows).map(([k, v]) => `<tr><td>${esc(SRC[k] || k)}</td><td>${v.uniques}</td><td>${v.views}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">Aún no hay visitas registradas.</td></tr>'}
       </table></div>
