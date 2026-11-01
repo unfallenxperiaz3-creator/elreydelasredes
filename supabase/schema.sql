@@ -129,3 +129,31 @@ create or replace function add_visit(d date, s text, u boolean) returns void lan
     set views = visits_daily.views + 1,
         uniques = visits_daily.uniques + (case when u then 1 else 0 end);
 $$;
+
+-- ===== Clics únicos por temporada (añadido después; se puede ejecutar solo este bloque) =====
+-- Cada persona cuenta como máximo 1 clic por creador y temporada. Sirve para desempatar el ranking.
+create table if not exists creator_clicks (
+  creator_id uuid not null references creators (id) on delete cascade,
+  visitor text not null,
+  season text not null,
+  created_at timestamptz not null default now(),
+  primary key (creator_id, visitor, season)
+);
+create table if not exists season_clicks (
+  creator_id uuid not null references creators (id) on delete cascade,
+  season text not null,
+  n integer not null default 0,
+  primary key (creator_id, season)
+);
+alter table creator_clicks enable row level security;
+alter table season_clicks enable row level security;
+
+create or replace function add_unique_click(cid uuid, v text, s text) returns void language plpgsql as $$
+begin
+  insert into creator_clicks (creator_id, visitor, season) values (cid, v, s) on conflict do nothing;
+  if found then
+    update creators set clicks = clicks + 1 where id = cid and hidden = false;
+    insert into season_clicks (creator_id, season, n) values (cid, s, 1)
+      on conflict (creator_id, season) do update set n = season_clicks.n + 1;
+  end if;
+end $$;

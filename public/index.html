@@ -620,7 +620,7 @@ footer .demo{margin-left:auto}
   document.addEventListener('click', ev => {
     const a = ev.target.closest('[data-click]');
     if (a) {
-      fetch('/api/click', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: a.dataset.click }), keepalive: true }).catch(() => {});
+      fetch('/api/click', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: a.dataset.click, v: fanToken }), keepalive: true }).catch(() => {});
       return;
     }
     const nb = ev.target.closest('[data-newbid]'); if (nb) return openBid({});
@@ -1144,7 +1144,7 @@ footer .demo{margin-left:auto}
     const L = ST?.legal || {}, owner = L.name || '[nombre del titular]', nif = L.nif || '[NIF]', mail = L.email || '[email de contacto]';
     return {
       rules: ['Normas', [
-        'El puesto depende del total de la temporada: lo que paga el creador más lo que aportan sus fans. En caso de empate gana quien llegó antes.',
+        'El puesto depende del total de la temporada: lo que paga el creador más lo que aportan sus fans. Los clics nunca ponen a nadie por encima de quien ha pagado más: solo sirven para desempatar. En caso de empate gana quien tenga más clics de personas distintas esta temporada (cada persona cuenta una vez), y si siguen empatados, quien llegó antes.',
         'Cada creador elige un nicho y compite a la vez en el ranking general y en el de su nicho. Cada lunes a las 00:00 (hora de Madrid) se cierra la temporada, el número 1 entra en el salón de reyes y el ranking empieza de cero.',
         'Solo pueden pagar mayores de 18 años con su propia tarjeta. Los creadores pagan desde 3 €. Los fans aportan entre 3 y 20 € por pago, una vez o cada mes. El apoyo mensual se puede cancelar en cualquier momento desde la comunidad del creador. Los pagos no son reembolsables.',
         'Los duelos duran 24 horas y los acepta el creador retado. Gana la comunidad que más aporte durante el duelo. El premio es visibilidad y el logro, nunca dinero.',
