@@ -20,18 +20,26 @@ export async function GET(request) {
     const fan = cleanText(new URL(request.url).searchParams.get('fan'), 80) || null;
     const season = seasonKey();
     const now = Date.now();
-    const [{ creators, payments, ranked }, duelsRes, winsRes, hallRes, kings, bigRes, subsRes] = await Promise.all([
+    const [{ creators, payments, ranked }, duelsRes, winsRes, hallRes, kings, bigRes, firstRes, subsRes] = await Promise.all([
       board(season),
       db().from('duels').select('*').gte('created_at', new Date(now - 8 * DAY).toISOString()).order('created_at'),
       db().from('duels').select('winner').eq('status', 'done').not('winner', 'is', null),
       db().from('hall').select('season,creator_id,name,handle,total_cents,fans').order('season', { ascending: false }),
       fetchAll(() => db().from('king_log').select('season,creator_id,since').order('since')),
       db().from('payments').select('amount_cents,creator_id').order('amount_cents', { ascending: false }).limit(20),
+      db().from('payments').select('creator_id,created_at').order('created_at', { ascending: true }).limit(2000),
       fan ? db().from('subscriptions').select('creator_id,amount_cents').eq('fan_token', fan).eq('status', 'active') : Promise.resolve({ data: [] })
     ]);
-    for (const r of [duelsRes, winsRes, hallRes, bigRes, subsRes]) if (r.error) throw r.error;
+    for (const r of [duelsRes, winsRes, hallRes, bigRes, firstRes, subsRes]) if (r.error) throw r.error;
     const byId = new Map(creators.map(c => [c.id, c]));
     const visible = id => byId.has(id) && !byId.get(id).hidden;
+
+    // Fundadores: los 10 primeros creadores que pagaron (para siempre)
+    const FOUNDERS = 10, founders = [];
+    for (const p of firstRes.data) {
+      if (founders.length >= FOUNDERS) break;
+      if (visible(p.creator_id) && !founders.includes(p.creator_id)) founders.push(p.creator_id);
+    }
 
     // Duelos: cerrar los que han terminado y calcular marcadores
     const duels = [];
@@ -77,7 +85,8 @@ export async function GET(request) {
 
     return json({
       season: { key: season, n: seasonNumber(season), endsAt: seasonEndsAt() },
-      creators: ranked.map(c => publicCreator(c, fan)),
+      creators: ranked.map(c => ({ ...publicCreator(c, fan), founder: founders.indexOf(c.id) + 1 || 0 })),
+      founders: { total: FOUNDERS, taken: founders.length },
       duels, duelWins,
       hall: hallRes.data.map(h => ({ season: h.season, n: seasonNumber(h.season), creatorId: h.creator_id, name: h.name, handle: h.handle, total: h.total_cents / 100, fans: h.fans })),
       feed,

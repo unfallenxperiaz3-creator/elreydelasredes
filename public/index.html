@@ -92,6 +92,12 @@ img.avatar{object-fit:cover}
 .ver{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--gold-ink)}
 .ver svg{width:14px;height:14px}
 .unver{font-size:12px;color:var(--muted);font-style:italic}
+.fnd{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--on-gold);background:linear-gradient(135deg,#e6c878,#b08d3a);border-radius:3px;padding:1px 7px}
+.fbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px;padding:12px 16px;border:1px solid #5a4a22;border-radius:10px;background:linear-gradient(135deg,#1d180c,#121110);font-size:15px;color:var(--muted);max-width:640px}
+.fbar b{color:var(--gold-ink)}
+.fbar .seats{display:flex;gap:4px}
+.fbar .seats i{width:12px;height:12px;border-radius:2px;background:var(--gold);display:block}
+.fbar .seats i.off{background:#3a362f}
 .you{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:var(--gold);color:var(--on-gold);border-radius:3px;padding:1px 6px}
 .mefan{font-size:12px;font-weight:600;color:var(--gold-ink)}
 .gbar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
@@ -300,6 +306,7 @@ footer .demo{margin-left:auto}
     <h1>Paga. Sube.<br><span>Reina.</span></h1>
     <p class="claim">Sé el rey o la reina de las redes y haz que tus seguidores <em>te mantengan en lo más alto</em></p>
     <p>El ranking de creadores de TikTok e Instagram donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio y deja que tus seguidores te suban. Gana la comunidad más fuerte de la semana.</p>
+    <div class="fbar" id="fbar" hidden></div>
     <div class="ctas">
       <button class="btn btn-primary" id="cta-main">Soy creador: conseguir mi puesto</button>
       <a class="btn btn-outline" href="#ranking">Soy fan: apoyar a alguien</a>
@@ -430,6 +437,8 @@ footer .demo{margin-left:auto}
   }
   const net = p => `<span class="tag">${p === 'tiktok' ? 'TikTok' : 'Instagram'}</span>`;
   const verMark = e => e.verified ? `<span class="ver">${CHECK}Verificado</span>` : `<span class="unver">${e.verifyRequested ? 'Verificación pendiente' : 'Sin verificar'}</span>`;
+  const fnd = e => e.founder ? `<span class="fnd" title="Uno de los 10 primeros creadores">Fundador nº${e.founder}</span>` : '';
+  const foundersLeft = () => ST && ST.founders ? Math.max(0, ST.founders.total - ST.founders.taken) : 0;
   const list = () => ST ? ST.creators : [];
   const byId = id => list().find(x => x.id === id);
   const total = e => e.own + e.fans;
@@ -456,6 +465,7 @@ footer .demo{margin-left:auto}
 
   function achievements(e) {
     const a = [], p = posOf(e), np = nichePos(total(e), e.cat, e.id);
+    if (e.founder) a.push(`Fundador nº${e.founder}`);
     if (p === 1) a.push('En el trono');
     if (np === 1) a.push(`Rey de ${CATS[e.cat]}`);
     if (p <= 10) a.push('Top 10');
@@ -518,7 +528,7 @@ footer .demo{margin-left:auto}
         ${avatar(k)}
         <div style="min-width:0">
           <div class="th-name">${esc(k.name)}</div>
-          <div class="meta">@${esc(k.handle)} ${verMark(k)} ${net(k.platform)} <span class="tag">${CATS[k.cat] || ''}</span></div>
+          <div class="meta">@${esc(k.handle)} ${verMark(k)} ${fnd(k)} ${net(k.platform)} <span class="tag">${CATS[k.cat] || ''}</span></div>
         </div>
       </div>
       <div class="facts num">
@@ -552,7 +562,7 @@ footer .demo{margin-left:auto}
         ${avatar(e)}
         <div class="info">
           <a class="nm" href="${esc(e.url)}" target="_blank" rel="noopener nofollow ugc" data-click="${e.id}">${esc(e.name)}</a>
-          <div class="meta">@${esc(e.handle)} ${verMark(e)} ${net(e.platform)} <span class="tag">${CATS[e.cat] || ''}</span>
+          <div class="meta">@${esc(e.handle)} ${verMark(e)} ${fnd(e)} ${net(e.platform)} <span class="tag">${CATS[e.cat] || ''}</span>
             ${niche && shown === 1 ? `<span class="tag" style="color:var(--gold-ink)">Rey de ${CATS[filter]}</span>` : ''}
             ${mine ? '<span class="you">Tú</span>' : ''}${e.me ? `<span class="mefan">${sub ? `Le apoyas · ${eur(sub.amount)}/mes` : `Le apoyas · ${eur(e.me.amount)}`}</span>` : ''}</div>
           ${fan1 || e.goal ? `<div class="fan1">${fan1 ? `Fan nº1: <b>${esc(fan1.nick)}</b>` : ''}${fan1 && e.goal ? ' · ' : ''}${e.goal ? `<span class="goalchip">Meta <b>${goalPct(e)} %</b></span>` : ''}</div>` : ''}
@@ -614,7 +624,16 @@ footer .demo{margin-left:auto}
     </li>`).join('') || '<li><span class="s">Temporada ' + ST.season.n + '</span><span class="n">Por decidir</span><span class="m">Se cierra el lunes a las 00:00</span></li>';
   }
 
-  function render(anim) { renderTabs(); renderThrone(anim); renderList(); renderDuels(); renderStats(); renderHall(); }
+  function renderFounders() {
+    const el = $('fbar'), f = ST.founders;
+    if (!f) { el.hidden = true; return; }
+    const left = foundersLeft();
+    el.hidden = false;
+    el.innerHTML = left > 0
+      ? `<span class="seats" aria-hidden="true">${Array.from({ length: f.total }, (_, i) => `<i class="${i < f.taken ? 'off' : ''}"></i>`).join('')}</span><span><b>Quedan ${left} de ${f.total} plazas de Fundador.</b> Los ${f.total} primeros creadores llevarán para siempre la insignia de Fundador en el ranking.</span>`
+      : `<span><b>Las ${f.total} plazas de Fundador ya tienen dueño.</b> Búscalos en el ranking con su insignia dorada.</span>`;
+  }
+  function render(anim) { renderFounders(); renderTabs(); renderThrone(anim); renderList(); renderDuels(); renderStats(); renderHall(); }
 
   // ---------- eventos ----------
   document.addEventListener('click', ev => {
@@ -858,7 +877,7 @@ footer .demo{margin-left:auto}
     if (target !== undefined && all[target]) form.amount = Math.max(MIN, total(all[target]) + 1);
     if (me) { const p = all.indexOf(me); form.amount = p > 0 ? Math.max(MIN, total(all[p - 1]) + 1 - total(me)) : 10; }
     const title = me ? 'Subir tu puja' : target !== undefined ? `Quitar el puesto #${target + 1}` : 'Consigue tu puesto';
-    const lead = me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.';
+    const lead = me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.' + (foundersLeft() > 0 ? ` <b style="color:var(--gold-ink)">Quedan ${foundersLeft()} plazas de Fundador:</b> si entras ahora, llevarás la insignia para siempre.` : '');
 
     openSheet(`
       <h3 id="sheet-title">${title}</h3>
@@ -1110,6 +1129,7 @@ footer .demo{margin-left:auto}
       <div class="done">
         <h3 id="sheet-title">${kind === 'fan' ? (info.isTop ? '¡Eres su fan nº1!' : '¡Gracias por tu apoyo!') : `Estás en el #${p}`}</h3>
         ${kind === 'creator' ? `<p class="lead" style="margin:0 0 6px;color:var(--gold-ink);font-weight:600">#${np} en ${CATS[e.cat]}${np === 1 ? ' · eres el rey de tu nicho' : ''}</p>` : ''}
+        ${kind === 'creator' && e.founder ? `<p style="margin:0 0 12px"><span class="fnd" style="font-size:14px;padding:4px 12px">Eres Fundador nº${e.founder}</span></p>` : ''}
         <p class="lead">${kind === 'fan' ? `@${esc(e.handle)} va ahora #${p}.${info.monthly ? ` Tu apoyo de ${eur(info.amount)} se repetirá cada mes.` : ''} Sube esta imagen a tu historia para que se sumen más fans.` : 'Tu enlace ya recibe los clics de tu fila.'}</p>
         ${vb}
         ${kind === 'creator' ? `<div class="box gold">
@@ -1151,6 +1171,7 @@ footer .demo{margin-left:auto}
         'Las metas las fija cada creador y él es responsable de cumplirlas.',
         'Para el sello de verificado hay que poner en la bio el código que te damos. Las fotos deben ser tuyas: retiramos sin reembolso las de otras personas o con contenido inapropiado.',
         'Solo se admiten enlaces a perfiles o contenidos propios. Retiramos sin reembolso las cuentas que suplanten a otra persona y los enlaces a estafas, contenido adulto, odio o material de terceros.',
+        'Los 10 primeros creadores que consiguen su puesto reciben la insignia de Fundador, que se queda en su perfil para siempre mientras la cuenta siga activa.',
         'Aportar no da derecho a ningún premio ni sorteo: es apoyo y visibilidad para el creador.'
       ]],
       privacy: ['Privacidad', [
