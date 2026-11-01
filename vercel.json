@@ -1,0 +1,10 @@
+{
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/@:handle", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ],
+  "crons": [
+    { "path": "/api/cron-season", "schedule": "10 0 * * *" }
+  ]
+}

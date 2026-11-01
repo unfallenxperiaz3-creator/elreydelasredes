@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Rey de las Redes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0b0c;
+  --surface:#141416;
+  --ink:#f3ede0;
+  --muted:#9a9488;
+  --line:#2a2824;
+  --gold:#c9a24a;
+  --gold-ink:#dcbc68;
+  --on-gold:#0b0b0c;
+  --alert:#e05252;
+  --display:"Libre Caslon Display",Georgia,"Times New Roman",serif;
+  --body:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* Layout: lista de prestigio tipo revista sobre negro; numerales serif, filetes finos, oro como único acento */
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+.num{font-variant-numeric:tabular-nums}
+.serif{font-family:var(--display);font-weight:400}
+
+/* cabecera */
+.top{position:sticky;top:0;z-index:20;background:rgba(11,11,12,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;height:62px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;white-space:nowrap;flex:none}
+.logo svg{width:26px;color:var(--gold)}
+.lname{display:grid;font-family:var(--display);font-size:18px;line-height:1.02;letter-spacing:.08em;text-transform:uppercase}
+.lname span:first-child{color:var(--gold-ink)}
+.ticker{display:flex;gap:20px;margin-left:auto;font-size:13px;color:var(--muted)}
+.ticker span{white-space:nowrap}
+.ticker b{color:var(--ink);font-weight:600}
+.live{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2f9e5b;margin-right:6px;vertical-align:2px}
+@media (max-width:620px){.ticker .hide-s{display:none}.lname{font-size:16px}.ticker{gap:12px;font-size:12px}}
+@media (max-width:400px){.ticker .hide-xs{display:none}}
+
+/* portada */
+.hero{padding:52px 0 30px;display:grid;gap:18px}
+.hero h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(54px,10.5vw,100px);line-height:.95;letter-spacing:-.01em}
+.hero h1 span{color:var(--gold-ink)}
+.hero p.claim{margin:0;font-size:clamp(20px,3.4vw,26px);line-height:1.25;font-weight:600;color:var(--ink);max-width:30ch;text-wrap:balance}
+.hero p.claim em{font-style:normal;color:var(--gold-ink);border-bottom:2px solid var(--gold)}
+.hero p{margin:0;max-width:56ch;color:var(--muted);font-size:17px}
+.ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:6px;padding:12px 18px;font-weight:600;text-decoration:none;border:1px solid transparent;transition:background .15s,border-color .15s}
+.btn-primary{background:var(--gold);color:var(--on-gold)}
+.btn-primary:hover{background:var(--gold-ink)}
+.btn-outline{background:transparent;border-color:#3a362f;color:var(--ink)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold-ink)}
+.btn-gold{background:var(--gold);color:var(--on-gold)}
+.btn-gold:hover{background:var(--gold-ink)}
+.full{width:100%}
+
+/* trono */
+.throne{position:relative;margin:14px 0 30px;background:radial-gradient(90% 120% at 100% 0%,rgba(201,162,74,.14),transparent 60%),var(--surface);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:10px;padding:24px 22px 22px;overflow:hidden}
+.throne.crowned{animation:crown .6s ease-out}
+@keyframes crown{from{transform:translateY(-8px);opacity:.6}to{transform:none;opacity:1}}
+.th-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.th-top b{color:var(--gold-ink);font-weight:600}
+.th-water{position:absolute;right:-10px;bottom:-20px;width:200px;color:var(--gold);opacity:.07;pointer-events:none}
+.th-main{display:flex;align-items:center;gap:18px;margin:16px 0 18px}
+.th-n{font-family:var(--display);font-size:86px;line-height:.8;color:var(--gold-ink)}
+.th-main .avatar{width:68px;height:68px;font-size:24px;box-shadow:0 0 0 3px var(--surface),0 0 0 4px var(--gold)}
+.th-name{font-family:var(--display);font-size:clamp(30px,6vw,44px);line-height:1;word-break:break-word}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:14px}
+.facts div{padding:10px 0 10px 14px;border-left:1px solid var(--line)}
+.facts div:first-child{border-left:0;padding-left:0}
+.facts small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.facts strong{font-family:var(--display);font-weight:400;font-size:28px}
+.th-extra{display:grid;gap:8px;margin-bottom:16px;font-size:14px;color:var(--muted)}
+.th-extra b{color:var(--ink);font-weight:600}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+
+.avatar{flex:none;display:grid;place-items:center;border-radius:50%;font-weight:600;color:var(--gold-ink);background:#1f1d19;border:1px solid #3a362f;width:44px;height:44px;font-size:15px;text-transform:uppercase;letter-spacing:.02em}
+img.avatar{object-fit:cover}
+.meta{display:flex;gap:6px 10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.tag{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ver{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--gold-ink)}
+.ver svg{width:14px;height:14px}
+.unver{font-size:12px;color:var(--muted);font-style:italic}
+.you{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:var(--gold);color:var(--on-gold);border-radius:3px;padding:1px 6px}
+.mefan{font-size:12px;font-weight:600;color:var(--gold-ink)}
+.gbar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.gbar i{display:block;height:100%;background:var(--gold)}
+
+/* aviso enlace */
+.callout{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center;margin:0 0 34px;padding:18px 20px;border-radius:10px;background:linear-gradient(135deg,#1d180c,#121110);border:1px solid #5a4a22;color:var(--ink)}
+.callout .big{grid-row:1/3;font-family:var(--display);font-size:48px;line-height:1;color:var(--gold)}
+.callout b{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.1}
+.callout p{margin:0;font-size:15px;color:var(--muted)}
+
+/* ranking */
+.sect-h{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.sect-h h2{margin:0;font-family:var(--display);font-weight:400;font-size:40px;line-height:1}
+.sect-h p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:100%}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;max-width:100%}
+.tabs button{border:0;background:transparent;padding:7px 10px;font-size:14px;font-weight:500;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-pressed="true"]{color:var(--gold-ink);border-bottom-color:var(--gold);font-weight:600}
+.filters select{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--ink);font:inherit;font-size:14px;max-width:100%}
+.list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.row{display:grid;grid-template-columns:62px 44px 1fr auto;align-items:center;gap:6px 14px;padding:16px 16px 14px 8px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row.mine{background:#1b1710}
+.pos{font-family:var(--display);font-size:42px;line-height:1;color:#5f5a52;text-align:right}
+.row.top3 .pos{color:var(--ink)}
+.pos .gen{display:block;font-family:var(--body);font-size:11px;color:var(--muted);margin-top:3px}
+.info{min-width:0}
+.info a.nm{text-decoration:none;font-weight:600;font-size:17px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.info a.nm:hover{text-decoration:underline}
+.info .fan1{font-size:12px;color:var(--muted);margin-top:3px}
+.info .fan1 b{color:var(--gold-ink);font-weight:600}
+.stats{text-align:right;line-height:1.2}
+.stats .amt{font-family:var(--display);font-size:26px}
+.stats .clk{font-size:12px;color:var(--muted)}
+.split{grid-column:3/5;height:3px;border-radius:2px;background:var(--line);overflow:hidden;display:flex}
+.split i{display:block;height:100%}
+.split .own{background:#5a5650}
+.split .fans{background:var(--gold)}
+.racts{grid-column:3/5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+.sbtn{border-radius:5px;padding:6px 12px;font-weight:600;font-size:13px;white-space:nowrap;border:1px solid #3a362f;background:transparent;color:var(--ink)}
+.sbtn:hover{border-color:var(--gold);color:var(--gold-ink)}
+.sbtn.pri{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.sbtn.pri:hover{background:var(--gold-ink);color:var(--on-gold)}
+.sbtn.link{border:0;background:none;padding:6px 4px;text-decoration:underline;text-underline-offset:3px;color:var(--muted)}
+.sbtn.link:hover{color:var(--ink)}
+.goalchip{font-size:12px;color:var(--muted)}
+.goalchip b{color:var(--ink);font-weight:600}
+@media (max-width:620px){
+  .row{grid-template-columns:40px 40px 1fr auto;gap:6px 10px;padding-right:12px}
+  .pos{font-size:32px}
+  .avatar{width:40px;height:40px;font-size:14px}
+  .th-n{font-size:64px}
+  .facts strong{font-size:22px}
+}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin:10px 0 0}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:6px;vertical-align:3px}
+.feed{margin:22px 0 0;padding:12px 16px;border-left:3px solid var(--gold);background:var(--surface);font-size:14px;color:var(--muted);display:grid;gap:4px}
+.feed b{color:var(--ink);font-weight:600}
+
+/* duelos */
+.duels{margin:44px 0 0}
+.dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:720px){.dgrid{grid-template-columns:1fr}}
+.duel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px 12px;align-items:center}
+.dside{display:grid;gap:6px;justify-items:start;min-width:0}
+.dside.r{justify-items:end;text-align:right}
+.dside b{font-weight:600;font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dside span{font-size:12px;color:var(--muted)}
+.dside strong{font-family:var(--display);font-weight:400;font-size:26px}
+.vs{font-family:var(--display);font-size:22px;color:var(--gold-ink)}
+.dbar{grid-column:1/4;height:6px;border-radius:3px;background:#4a463f;overflow:hidden}
+.dbar i{display:block;height:100%;background:var(--gold)}
+.dfoot{grid-column:1/4;display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.dacts{grid-column:1/4;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dacts button{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dempty{color:var(--muted);font-size:15px;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:16px}
+
+/* récords y salón */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:44px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card small{color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+.card strong{display:block;font-family:var(--display);font-weight:400;font-size:34px;line-height:1.1;margin:6px 0 2px}
+.card span{font-size:14px;color:var(--muted);word-break:break-word}
+@media (max-width:620px){.cards{grid-template-columns:1fr}}
+.hall{margin:0 0 44px}
+.hall ol{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.hall li{display:grid;grid-template-columns:110px 1fr auto;gap:12px;align-items:center;padding:14px 16px;border-top:1px solid var(--line)}
+.hall li:first-child{border-top:0}
+.hall .s{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-ink);font-weight:600}
+.hall .n{font-family:var(--display);font-size:21px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hall .m{font-size:13px;color:var(--muted);text-align:right}
+@media (max-width:620px){.hall li{grid-template-columns:1fr auto}.hall .s{grid-column:1/3}}
+
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin:0 0 44px;padding-top:26px;border-top:1px solid var(--line)}
+.how h3{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:24px}
+.how h3 span{color:var(--gold-ink);margin-right:8px}
+.how p{margin:0;color:var(--muted);font-size:15px}
+@media (max-width:620px){.how{grid-template-columns:1fr;gap:18px}}
+
+.wait{margin:0 0 50px;border-radius:12px;padding:26px 24px;display:grid;gap:12px;background:linear-gradient(135deg,#1d180c,#121110);border:1px solid #5a4a22;color:var(--ink)}
+.wait h2{margin:0;font-family:var(--display);font-weight:400;font-size:34px;line-height:1}
+.wait p{margin:0;color:var(--muted);max-width:56ch}
+.wait form{display:flex;gap:8px;flex-wrap:wrap}
+.wait input{flex:1 1 220px;background:var(--bg);border:1px solid #3a362f;border-radius:6px;padding:11px 12px;color:var(--ink);font:inherit}
+.wait input::placeholder{color:#6f6a60}
+.wait input:focus{outline:none;border-color:var(--gold)}
+.wait .msg{font-size:14px;min-height:1.2em}
+
+footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:13px;background:#08080a}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+footer button{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+footer .demo{margin-left:auto}
+
+/* ventanas */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);display:none;align-items:flex-end;justify-content:center}
+.scrim.open{display:flex}
+.sheet{width:100%;max-width:540px;max-height:92%;overflow:auto;background:var(--surface);border-radius:14px 14px 0 0;padding:24px 22px 26px;border:1px solid var(--line);box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+@media (min-width:621px){.scrim{align-items:center;padding:20px}.sheet{border-radius:14px}}
+.sheet h3{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:32px;line-height:1.05}
+.sheet .lead{margin:0 0 18px;color:var(--muted);font-size:15px}
+.x{float:right;background:none;border:0;font-size:26px;line-height:1;color:var(--muted);padding:2px 6px}
+.field{display:grid;gap:6px;margin-bottom:16px}
+.field label,.field .lbl{font-size:13px;font-weight:600}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:11px 12px;color:var(--ink);font:inherit}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
+.field .hint{font-size:12px;color:var(--muted)}
+.field .err{font-size:12px;color:var(--alert)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{border:1px solid #3a362f;background:transparent;border-radius:6px;padding:10px;font-weight:600;font-size:14px}
+.seg button[aria-pressed="true"]{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);color:var(--gold-ink)}
+.catgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:220px;overflow-y:auto;padding:2px}
+.catgrid button{border:1px solid #3a362f;background:transparent;border-radius:6px;padding:9px 10px;font-weight:500;font-size:13px;text-align:left}
+.catgrid button[hidden]{display:none}
+.catgrid button[aria-pressed="true"]{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);color:var(--gold-ink);font-weight:600}
+.amtwrap{position:relative}
+.amtwrap input{padding-right:70px;font-family:var(--display);font-size:30px}
+.amtwrap span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{border:1px solid #3a362f;background:transparent;border-radius:5px;padding:5px 9px;font-size:13px}
+.quick button:hover{border-color:var(--gold)}
+.preview{background:var(--bg);border-radius:8px;padding:12px 14px;margin:2px 0 18px;font-size:15px}
+.preview b{font-family:var(--display);font-weight:400;font-size:24px;color:var(--gold-ink)}
+.photo{display:flex;align-items:center;gap:14px}
+.photo .ph{width:60px;height:60px;border-radius:50%;border:1px dashed #5a564e;display:grid;place-items:center;color:var(--muted);font-size:11px;overflow:hidden;flex:none;background:var(--bg)}
+.photo .ph img{width:100%;height:100%;object-fit:cover}
+.photo label.btn{cursor:pointer;padding:9px 14px}
+.photo input{position:absolute;left:-9999px}
+.summary{display:grid;gap:8px;border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:16px;font-size:15px}
+.summary div{display:flex;justify-content:space-between;gap:12px}
+.summary div span:first-child{color:var(--muted)}
+.summary div span:last-child{text-align:right;word-break:break-all}
+.summary .total{border-top:1px solid var(--line);padding-top:8px;font-weight:600}
+.summary .total span:first-child{color:var(--ink)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:0 0 16px}
+.check input{width:18px;height:18px;accent-color:var(--gold);flex:none;margin-top:2px}
+.note{font-size:12px;color:var(--muted);margin:10px 0 0}
+.done{text-align:center}
+.done img{width:170px;aspect-ratio:9/16;border-radius:10px;border:1px solid var(--line);display:block;margin:4px auto 8px}
+.box{display:grid;gap:8px;text-align:left;border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 14px}
+.box.gold{border-color:#5a4a22;background:#1a160c}
+.box .t{font-family:var(--display);font-size:22px;line-height:1.1}
+.box code{display:block;font-size:13px;background:var(--bg);border-radius:6px;padding:8px 10px;word-break:break-all}
+.box ol{margin:0;padding-left:18px;font-size:14px;color:var(--muted);display:grid;gap:2px}
+.box .code{font-family:var(--display);font-size:32px;letter-spacing:.06em;text-align:center;background:var(--bg);border-radius:6px;padding:6px}
+.legal p{color:var(--muted);font-size:14px;margin:0 0 10px}
+
+/* ficha de comunidad */
+.cs-head{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.cs-head .avatar{width:58px;height:58px;font-size:20px}
+.cs-head h3{margin:0 0 4px}
+.cs-sec{border-top:1px solid var(--line);padding:16px 0 4px}
+.cs-sec h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.cs-sec p{margin:0 0 8px;font-size:15px}
+.cs-sec .small{font-size:13px;color:var(--muted)}
+.cs-facts{margin-bottom:6px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border:1px solid var(--gold);color:var(--gold-ink);background:#1a160c;border-radius:999px;padding:3px 10px}
+.badge::before{content:"";width:6px;height:6px;background:var(--gold);transform:rotate(45deg)}
+.fanlist{list-style:none;margin:0 0 8px;padding:0;display:grid}
+.fanlist li{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.fanlist li:first-child{border-top:0}
+.fanlist .fp{font-family:var(--display);font-size:22px;color:#5f5a52;text-align:center}
+.fanlist li:first-child .fp{color:var(--gold-ink)}
+.fanlist li.me{font-weight:600}
+.hook{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:14px}
+.hook b{color:var(--gold-ink)}
+.inline{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.inline input,.inline select{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;font:inherit;color:var(--ink);min-width:0}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--on-gold);padding:10px 16px;border-radius:8px;font-weight:500;font-size:14px;z-index:60;transition:.25s;pointer-events:none;max-width:92%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.alert{background:var(--alert);color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="El Rey de las Redes, inicio">
+      <svg viewBox="0 0 64 52" aria-hidden="true"><path d="M4 38 8 10l14 15L32 4l10 21 14-15 4 28Z" fill="currentColor"/><rect x="4" y="42" width="56" height="7" rx="2" fill="currentColor"/></svg>
+      <span class="lname"><span>El Rey de</span><span>las Redes</span></span>
+    </a>
+    <div class="ticker num">
+      <span>Hoy <b id="t-today">0 €</b></span>
+      <span class="hide-s"><b id="t-clicks">0</b> clics enviados</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <section class="hero">
+    <h1>Paga. Sube.<br><span>Reina.</span></h1>
+    <p class="claim">Sé el rey o la reina de las redes y haz que tus seguidores <em>te mantengan en lo más alto</em></p>
+    <p>El ranking de creadores de TikTok e Instagram donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio y deja que tus seguidores te suban. Gana la comunidad más fuerte de la semana.</p>
+    <div class="ctas">
+      <button class="btn btn-primary" id="cta-main">Soy creador: conseguir mi puesto</button>
+      <a class="btn btn-outline" href="#ranking">Soy fan: apoyar a alguien</a>
+    </div>
+  </section>
+
+  <section class="throne" id="throne" aria-label="Puesto número 1"><p style="margin:0;color:var(--muted)">Cargando el ranking…</p></section>
+
+  <aside class="callout" aria-label="Cómo atraer apoyos">
+    <span class="big" aria-hidden="true">+</span>
+    <b>Obtén tu puesto y comparte tu enlace</b>
+    <p>Al pagar recibes tu enlace de apoyo personal. Ponlo en tu bio de TikTok o Instagram y en tus historias: cada seguidor que te apoye te sube puestos sin que tú pagues más.</p>
+  </aside>
+
+  <section id="ranking">
+    <div class="sect-h">
+      <div><h2>Ranking</h2><p>Total de la temporada: puja del creador más apoyo de sus fans.</p></div>
+      <div class="filters">
+        <div class="tabs" role="group" aria-label="Nichos con creadores" id="tabs"></div>
+        <label for="cat-select" style="position:absolute;left:-9999px">Todos los nichos</label>
+        <select id="cat-select"></select>
+      </div>
+    </div>
+    <ol class="list" id="list"></ol>
+    <div class="legend"><span><i style="background:#5a5650"></i>Pagado por el creador</span><span><i style="background:var(--gold)"></i>Aportado por sus fans</span></div>
+    <div class="feed" id="feed" aria-live="polite"></div>
+  </section>
+
+  <section class="duels" aria-labelledby="duels-h">
+    <div class="sect-h"><div><h2 id="duels-h">Duelos</h2><p>Dos creadores, 24 horas. Gana la comunidad que más aporte y se lleva el protagonismo.</p></div></div>
+    <div id="duels"></div>
+  </section>
+
+  <section class="cards" aria-label="Récords">
+    <div class="card"><small>Comunidad más fuerte</small><strong class="num" id="s-com">–</strong><span id="s-com-who"></span></div>
+    <div class="card"><small>Reinado más largo</small><strong class="num" id="s-reign">–</strong><span id="s-reign-who"></span></div>
+    <div class="card"><small>Pago más alto</small><strong class="num" id="s-bid">–</strong><span id="s-bid-who"></span></div>
+  </section>
+
+  <section class="hall" aria-labelledby="hall-h">
+    <div class="sect-h"><div><h2 id="hall-h">Salón de reyes</h2><p>Quienes cerraron la semana en el número 1.</p></div></div>
+    <ol id="hall"></ol>
+  </section>
+
+  <section class="how" aria-label="Cómo funciona">
+    <div><h3><span>I</span>Creadores</h3><p>Consiguen su puesto desde 3 € y reciben un enlace de apoyo para su bio. Pueden marcarse metas y retar a otros creadores a un duelo.</p></div>
+    <div><h3><span>II</span>Fans</h3><p>Apoyan a su creador una vez o cada mes, con entre 3 y 20 € por pago. Quien más aporta se convierte en su fan nº1.</p></div>
+    <div><h3><span>III</span>Cada lunes</h3><p>Se cierra la temporada. El número 1 entra en el salón de reyes, suma logros y el ranking empieza de cero.</p></div>
+  </section>
+
+  <section class="wait" aria-labelledby="wait-h">
+    <h2 id="wait-h">Lista de espera</h2>
+    <p>Abrimos pronto. Apúntate y entra gratis en la semana de fundadores, antes de que empiecen las pujas.</p>
+    <form id="waitform" novalidate>
+      <input id="wait-email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" aria-label="Tu email">
+      <button class="btn btn-gold" type="submit">Apuntarme</button>
+    </form>
+    <div class="msg" id="wait-msg" role="status"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <button data-legal="rules">Normas</button>
+    <button data-legal="privacy">Privacidad</button>
+    <button data-legal="cookies">Cookies</button>
+    <button data-legal="aviso">Aviso legal</button>
+    <button id="recover">Recuperar acceso de creador</button>
+    <span class="demo">© El Rey de las Redes · Pagos seguros con Stripe</span>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="sheet" id="sheet"></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const CROWN_PATH = 'M4 38 8 10l14 15L32 4l10 21 14-15 4 28Z';
+  const CROWN = `<svg viewBox="0 0 64 52" aria-hidden="true"><path d="${CROWN_PATH}" fill="currentColor"/><rect x="4" y="42" width="56" height="7" rx="2" fill="currentColor"/></svg>`;
+  const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M4.5 8.3 7 10.7l4.6-5" fill="none" stroke="#0b0b0c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const H = 3600e3, D = 24 * H;
+  const MIN = 3, FAN_MAX = 20, CREATOR_MAX = 10000;
+  const CATS = {
+    humor: 'Humor', musica: 'Música y baile', gaming: 'Gaming', deportes: 'Deportes y fitness',
+    belleza: 'Belleza y moda', lifestyle: 'Lifestyle', viajes: 'Viajes', comida: 'Comida y cocina',
+    salud: 'Salud y bienestar', educacion: 'Educación', tecnologia: 'Tecnología', negocios: 'Finanzas y negocios',
+    motor: 'Motor', mascotas: 'Animales', familia: 'Familia', arte: 'Arte y creatividad',
+    entretenimiento: 'Entretenimiento', hogar: 'Hogar', noticias: 'Noticias', espiritualidad: 'Espiritualidad',
+    otro: 'Otro'
+  };
+  const SYN = {
+    humor: 'comedia memes risa retos bromas challenges', musica: 'baile dance coreografia cantante rap trap dj beats',
+    gaming: 'videojuegos streamer twitch', deportes: 'fitness gym gimnasio entreno culturismo futbol running ciclismo basket padel tenis',
+    belleza: 'maquillaje skincare moda ropa outfits estilo', lifestyle: 'vlog dia a dia relaciones pareja amor citas',
+    comida: 'cocina recetas chef restaurantes foodie', salud: 'nutricion yoga motivacion desarrollo personal mentalidad productividad',
+    educacion: 'ciencia idiomas historia aprender', tecnologia: 'tech moviles gadgets ia', negocios: 'dinero bolsa crypto inversion emprender marketing',
+    motor: 'coches motos tuning', mascotas: 'perros gatos mascotas', familia: 'padres madres bebes crianza',
+    arte: 'dibujo manualidades diy bricolaje fotografia video edicion', entretenimiento: 'cine series peliculas netflix anime manga comic libros booktok asmr',
+    hogar: 'casa decoracion limpieza plantas jardin', noticias: 'actualidad', espiritualidad: 'astrologia tarot horoscopo'
+  };
+  const now = () => Date.now();
+
+  // ---------- almacenamiento local (solo comodidades de este navegador) ----------
+  const LS = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  function rnd() { const a = new Uint8Array(24); crypto.getRandomValues(a); return Array.from(a, x => x.toString(16).padStart(2, '0')).join(''); }
+  let fanToken = LS.get('rr-fan', null);
+  if (!fanToken) { fanToken = rnd(); LS.set('rr-fan', fanToken); }
+  let myNick = LS.get('rr-nick', '');
+  let owned = LS.get('rr-owned', {});   // id de creador -> llave de dueño
+
+  let ST = null, filter = 'all', lastPos = {};
+
+  // ---------- utilidades ----------
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const eur = n => (+n).toLocaleString('es-ES') + ' €';
+  const int = n => (+n).toLocaleString('es-ES');
+  function profileUrl(p, h) { return p === 'tiktok' ? `https://www.tiktok.com/@${h}` : `https://www.instagram.com/${h}/`; }
+  function domain(u) { try { const x = new URL(u); return (x.hostname.replace(/^www\./, '') + x.pathname).replace(/\/$/, ''); } catch (e) { return u; } }
+  function dur(ms) {
+    ms = Math.max(ms, 0);
+    const d = Math.floor(ms / D), h = Math.floor(ms % D / H), m = Math.floor(ms % H / 60e3);
+    if (d) return `${d} d ${h} h`;
+    if (h) return `${h} h ${m} min`;
+    return `${Math.max(m, 1)} min`;
+  }
+  function ago(t) { const m = Math.round((now() - new Date(t).getTime()) / 60e3); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; }
+  function avatar(e) {
+    if (e.photo) return `<img class="avatar" src="${esc(e.photo)}" alt="">`;
+    const ini = e.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2);
+    return `<span class="avatar" aria-hidden="true">${esc(ini)}</span>`;
+  }
+  const net = p => `<span class="tag">${p === 'tiktok' ? 'TikTok' : 'Instagram'}</span>`;
+  const verMark = e => e.verified ? `<span class="ver">${CHECK}Verificado</span>` : `<span class="unver">${e.verifyRequested ? 'Verificación pendiente' : 'Sin verificar'}</span>`;
+  const list = () => ST ? ST.creators : [];
+  const byId = id => list().find(x => x.id === id);
+  const total = e => e.own + e.fans;
+  const isMine = e => !!owned[e.id];
+  const posOf = e => list().indexOf(e) + 1;
+  const nichePos = (t, cat, selfId) => list().filter(e => e.id !== selfId && e.cat === cat && total(e) >= t).length + 1;
+  const positionFor = (t, selfId) => list().filter(e => e.id !== selfId && total(e) >= t).length + 1;
+  const goalPct = e => e.goal ? Math.min(100, Math.round(e.fans / e.goal.target * 100)) : 0;
+  const goalBar = e => `<div class="gbar" aria-hidden="true"><i style="width:${goalPct(e)}%"></i></div>`;
+  const supportLink = e => `${location.origin}/@${e.handle}`;
+  const subOf = id => (ST?.subs || []).find(s => s.creatorId === id);
+  const liveDuels = () => (ST?.duels || []).filter(d => d.status === 'active' && new Date(d.endsAt).getTime() > now());
+
+  async function api(path, body) {
+    const r = await fetch(path, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : { cache: 'no-store' });
+    let data = null;
+    try { data = await r.json(); } catch (e) {}
+    if (!r.ok) throw new Error(data?.error || 'Algo ha fallado. Inténtalo de nuevo en unos segundos.');
+    return data;
+  }
+  async function copyText(txt, ok) {
+    try { await navigator.clipboard.writeText(txt); toast(ok); } catch (err) { toast('No se pudo copiar. Mantén pulsado el texto para copiarlo a mano.'); }
+  }
+
+  function achievements(e) {
+    const a = [], p = posOf(e), np = nichePos(total(e), e.cat, e.id);
+    if (p === 1) a.push('En el trono');
+    if (np === 1) a.push(`Rey de ${CATS[e.cat]}`);
+    if (p <= 10) a.push('Top 10');
+    const hall = (ST.hall || []).filter(h => h.creatorId === e.id).length;
+    if (hall) a.push(hall > 1 ? `Ex rey ×${hall}` : 'Ex rey');
+    const w = (ST.duelWins || {})[e.id];
+    if (w) a.push(w > 1 ? `${w} duelos ganados` : 'Duelo ganado');
+    if (e.goal && e.fans >= e.goal.target) a.push('Meta cumplida');
+    if (e.supporters >= 50) a.push('Comunidad de 50'); else if (e.supporters >= 25) a.push('Comunidad de 25');
+    if (e.clicks >= 1000) a.push('+1.000 clics');
+    if (e.verified) a.push('Verificado');
+    return a;
+  }
+
+  // ---------- carga de datos ----------
+  async function load() {
+    const prevKing = ST?.creators[0]?.id;
+    ST = await api('/api/state?fan=' + encodeURIComponent(fanToken));
+    render(!!prevKing && ST.creators[0]?.id !== prevKing);
+    checkAlerts();
+  }
+
+  function checkAlerts() {
+    const cur = {};
+    Object.keys(owned).forEach(id => { const e = byId(id); if (e) cur[id] = posOf(e); });
+    Object.entries(cur).forEach(([id, p]) => {
+      if (lastPos[id] && p > lastPos[id]) toast(`Te han superado: @${byId(id).handle} baja al #${p}`, true);
+    });
+    lastPos = cur;
+  }
+
+  // ---------- pintar ----------
+  function renderTabs() {
+    const count = {}; list().forEach(e => count[e.cat] = (count[e.cat] || 0) + 1);
+    const used = Object.keys(CATS).filter(k => count[k]).sort((a, b) => count[b] - count[a]).slice(0, 5);
+    if (filter !== 'all' && !used.includes(filter)) used.push(filter);
+    $('tabs').innerHTML = [['all', 'Todos'], ...used.map(k => [k, CATS[k]])].map(([k, v]) => `<button data-f="${k}" aria-pressed="${filter === k}">${v}</button>`).join('');
+    $('cat-select').innerHTML = `<option value="all">Todos los nichos (${Object.keys(CATS).length})</option>` +
+      Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${filter === k ? 'selected' : ''}>${v}${count[k] ? ` · ${count[k]}` : ''}</option>`).join('');
+  }
+
+  function renderThrone(anim) {
+    const k = list()[0];
+    if (!k) {
+      $('throne').innerHTML = `
+        <span class="th-water">${CROWN}</span>
+        <div class="th-top"><b>El trono está vacío</b><span>Temporada ${ST.season.n}</span></div>
+        <div class="th-main"><span class="th-n">1</span><div style="min-width:0"><div class="th-name">Nadie reina todavía</div>
+          <div class="meta">Quien consiga el primer puesto se sienta aquí y se lleva todas las miradas.</div></div></div>
+        <div class="acts"><button class="btn btn-primary" data-newbid="1">Conseguir el trono</button></div>`;
+      return;
+    }
+    const t = total(k), fan1 = (k.topFans || [])[0], mine = isMine(k);
+    const since = ST.stats.kingSince;
+    $('throne').innerHTML = `
+      <span class="th-water">${CROWN}</span>
+      <div class="th-top"><b>En el trono${mine ? ' · eres tú' : ''}</b>${since ? `<span>Reinando desde hace ${dur(now() - new Date(since).getTime())}</span>` : ''}</div>
+      <div class="th-main">
+        <span class="th-n">1</span>
+        ${avatar(k)}
+        <div style="min-width:0">
+          <div class="th-name">${esc(k.name)}</div>
+          <div class="meta">@${esc(k.handle)} ${verMark(k)} ${net(k.platform)} <span class="tag">${CATS[k.cat] || ''}</span></div>
+        </div>
+      </div>
+      <div class="facts num">
+        <div><small>Total</small><strong>${eur(t)}</strong></div>
+        <div><small>Fans</small><strong>${int(k.supporters)}</strong></div>
+        <div><small>Clics</small><strong>${int(k.clicks)}</strong></div>
+      </div>
+      <div class="th-extra">
+        ${k.goal ? `<div><b>Meta:</b> ${esc(k.goal.text)} · ${goalPct(k)} %</div>${goalBar(k)}` : ''}
+        ${fan1 ? `<div>Fan nº1: <b>${esc(fan1.nick)}</b> con ${eur(fan1.amount)}</div>` : ''}
+      </div>
+      <div class="acts">
+        <button class="btn btn-gold" data-support="${k.id}">Apoyar</button>
+        <button class="btn btn-outline" data-creator="${k.id}">Ver comunidad</button>
+        <a class="btn btn-outline" href="${esc(k.url)}" target="_blank" rel="noopener nofollow ugc" data-click="${k.id}">Visitar perfil</a>
+        ${mine ? `<button class="btn btn-outline" data-topup="${k.id}">Reforzar puja</button><button class="btn btn-outline" data-copylink="${k.id}">Copiar mi enlace de apoyo</button>`
+               : `<button class="btn btn-primary" data-steal="0">Destronar por ${eur(t + 1)}</button>`}
+      </div>`;
+    if (anim) { const el = $('throne'); el.classList.remove('crowned'); void el.offsetWidth; el.classList.add('crowned'); }
+  }
+
+  function renderList() {
+    const all = list(), niche = filter !== 'all';
+    const rows = all.map((e, i) => ({ e, i })).filter(({ e, i }) => niche ? e.cat === filter : i > 0);
+    $('list').innerHTML = rows.map(({ e, i }, r) => {
+      const shown = niche ? r + 1 : i + 1;
+      const t = total(e), mine = isMine(e), sub = subOf(e.id);
+      const ownW = t ? e.own / t * 100 : 0, fan1 = (e.topFans || [])[0];
+      return `<li class="row ${shown <= 3 ? 'top3' : ''} ${mine ? 'mine' : ''}">
+        <span class="pos num">${shown}${niche ? `<span class="gen">#${i + 1} general</span>` : ''}</span>
+        ${avatar(e)}
+        <div class="info">
+          <a class="nm" href="${esc(e.url)}" target="_blank" rel="noopener nofollow ugc" data-click="${e.id}">${esc(e.name)}</a>
+          <div class="meta">@${esc(e.handle)} ${verMark(e)} ${net(e.platform)} <span class="tag">${CATS[e.cat] || ''}</span>
+            ${niche && shown === 1 ? `<span class="tag" style="color:var(--gold-ink)">Rey de ${CATS[filter]}</span>` : ''}
+            ${mine ? '<span class="you">Tú</span>' : ''}${e.me ? `<span class="mefan">${sub ? `Le apoyas · ${eur(sub.amount)}/mes` : `Le apoyas · ${eur(e.me.amount)}`}</span>` : ''}</div>
+          ${fan1 || e.goal ? `<div class="fan1">${fan1 ? `Fan nº1: <b>${esc(fan1.nick)}</b>` : ''}${fan1 && e.goal ? ' · ' : ''}${e.goal ? `<span class="goalchip">Meta <b>${goalPct(e)} %</b></span>` : ''}</div>` : ''}
+        </div>
+        <div class="stats num"><div class="amt">${eur(t)}</div><div class="clk">${int(e.supporters)} fans · ${int(e.clicks)} clics</div></div>
+        <div class="split" aria-hidden="true"><i class="own" style="width:${ownW}%"></i><i class="fans" style="width:${100 - ownW}%"></i></div>
+        <div class="racts">
+          <button class="sbtn pri" data-support="${e.id}">Apoyar</button>
+          <button class="sbtn" data-creator="${e.id}">Comunidad</button>
+          ${mine ? `<button class="sbtn" data-topup="${e.id}">Subir mi puja</button><button class="sbtn" data-copylink="${e.id}">Copiar mi enlace</button>${e.verified || e.verifyRequested ? '' : `<button class="sbtn" data-verify="${e.id}">Verificar</button>`}`
+                 : i === 0 ? '' : `<button class="sbtn link" data-steal="${i}" aria-label="Quitarle el puesto ${i + 1} a ${esc(e.name)} por ${eur(t + 1)}">Soy creador: quitar puesto · ${eur(t + 1)}</button>`}
+        </div>
+      </li>`;
+    }).join('') || `<li class="row" style="display:block;color:var(--muted);padding:18px">${niche ? 'Nadie en este nicho todavía. El primero que entre será su rey.' : all.length ? 'Solo hay un creador en el ranking. Entra ahora y ponte justo detrás del rey.' : 'El ranking está vacío. Consigue tu puesto y estrena la temporada.'}</li>`;
+  }
+
+  function duelHTML(d) {
+    const A = byId(d.a), B = byId(d.b); if (!A || !B) return '';
+    const sum = d.ta + d.tb, pa = sum ? Math.round(d.ta / sum * 100) : 50;
+    const done = d.status === 'done', W = done ? byId(d.winner) : null;
+    const side = (e, amt, r) => `<div class="dside ${r ? 'r' : ''}">${avatar(e)}<b>${esc(e.name)}</b><span>@${esc(e.handle)}</span><strong class="num">${eur(amt)}</strong></div>`;
+    return `<div class="duel">
+      ${side(A, d.ta, false)}<span class="vs">vs</span>${side(B, d.tb, true)}
+      <div class="dbar" aria-hidden="true"><i style="width:${pa}%"></i></div>
+      <div class="dfoot num"><span>${pa} %</span><span>${done ? (W ? `Ganó ${esc(W.name)}` : 'Terminado') : `Termina en ${dur(new Date(d.endsAt).getTime() - now())}`}</span><span>${100 - pa} %</span></div>
+      ${done ? '' : `<div class="dacts"><button class="sbtn pri" data-support="${A.id}">Apoyar a ${esc(A.name)}</button><button class="sbtn pri" data-support="${B.id}">Apoyar a ${esc(B.name)}</button></div>`}
+    </div>`;
+  }
+  function renderDuels() {
+    const ds = (ST.duels || []).filter(d => d.status !== 'pending' && byId(d.a) && byId(d.b))
+      .sort((a, b) => (a.status === 'done') - (b.status === 'done') || new Date(a.endsAt) - new Date(b.endsAt)).slice(0, 4);
+    $('duels').innerHTML = ds.length ? `<div class="dgrid">${ds.map(duelHTML).join('')}</div>`
+      : '<div class="dempty">No hay duelos ahora mismo. Si tienes puesto, reta a otro creador desde tu comunidad.</div>';
+  }
+
+  function renderStats() {
+    const all = list();
+    const com = [...all].sort((a, b) => b.supporters - a.supporters)[0];
+    $('s-com').textContent = com && com.supporters ? int(com.supporters) + ' fans' : '–';
+    $('s-com-who').textContent = com && com.supporters ? '@' + com.handle + ' · ' + eur(com.fans) + ' aportados' : 'Aún sin apoyos esta temporada';
+    const L = ST.stats.longest;
+    $('s-reign').textContent = L ? dur(L.ms) : '–';
+    $('s-reign-who').textContent = L ? '@' + L.handle + (L.live ? ' · sigue reinando' : '') : 'Aún no ha reinado nadie';
+    const B = ST.stats.biggest;
+    $('s-bid').textContent = B ? eur(B.amount) : '–';
+    $('s-bid-who').textContent = B ? '@' + B.handle + ' en un solo pago' : 'Aún no hay pagos';
+    $('t-today').textContent = eur(ST.stats.today);
+    $('t-clicks').textContent = int(ST.stats.clicks);
+    $('feed').innerHTML = (ST.feed || []).slice(0, 3).map(f => f.kind === 'fan'
+      ? `<div><b>${esc(f.nick)}</b> ${f.monthly ? 'renovó su apoyo mensual a' : 'apoyó a'} @${esc(f.handle)} con ${eur(f.amount)} · ${ago(f.at)}</div>`
+      : `<div><b>@${esc(f.handle)}</b> pujó ${eur(f.amount)} por su puesto · ${ago(f.at)}</div>`).join('') || '<div>Aquí verás la actividad en directo de la temporada.</div>';
+  }
+
+  function renderHall() {
+    $('hall').innerHTML = (ST.hall || []).map(h => `<li>
+      <span class="s">Temporada ${h.n}</span>
+      <span class="n">${esc(h.name)}</span>
+      <span class="m num">${eur(h.total)} · ${int(h.fans)} fans</span>
+    </li>`).join('') || '<li><span class="s">Temporada ' + ST.season.n + '</span><span class="n">Por decidir</span><span class="m">Se cierra el lunes a las 00:00</span></li>';
+  }
+
+  function render(anim) { renderTabs(); renderThrone(anim); renderList(); renderDuels(); renderStats(); renderHall(); }
+
+  // ---------- eventos ----------
+  document.addEventListener('click', ev => {
+    const a = ev.target.closest('[data-click]');
+    if (a) {
+      fetch('/api/click', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: a.dataset.click }), keepalive: true }).catch(() => {});
+      return;
+    }
+    const nb = ev.target.closest('[data-newbid]'); if (nb) return openBid({});
+    const vf = ev.target.closest('[data-verify]'); if (vf) { const e = byId(vf.dataset.verify); if (e) openVerify(e); return; }
+    const cl = ev.target.closest('[data-copylink]'); if (cl) { const e = byId(cl.dataset.copylink); if (e) copyText(supportLink(e), 'Enlace copiado: pégalo en tu bio'); return; }
+    const sp = ev.target.closest('[data-support]'); if (sp) return openSupport(sp.dataset.support, false);
+    const mo = ev.target.closest('[data-monthly]'); if (mo) return openSupport(mo.dataset.monthly, true);
+    const cr = ev.target.closest('[data-creator]'); if (cr) return openCreator(cr.dataset.creator);
+    const st = ev.target.closest('[data-steal]'); if (st) return openBid({ target: +st.dataset.steal });
+    const tu = ev.target.closest('[data-topup]'); if (tu) return openBid({ topUpId: tu.dataset.topup });
+    const tb = ev.target.closest('#tabs [data-f]'); if (tb) { filter = tb.dataset.f; renderTabs(); renderList(); return; }
+    const l = ev.target.closest('[data-legal]'); if (l) openLegal(l.dataset.legal);
+  });
+  $('cta-main').addEventListener('click', () => openBid({}));
+  $('recover').addEventListener('click', () => {
+    openSheet(`<h3 id="sheet-title">Recuperar acceso</h3>
+      <p class="lead">Si registraste tu cuenta en otro móvil o borraste el navegador, escríbenos desde tu red social o por email. Tras comprobar que eres tú, te mandaremos un código de acceso para pegarlo aquí.</p>
+      <div class="field"><label for="rec-code">Código de acceso</label><input id="rec-code" autocomplete="off" spellcheck="false" placeholder="xxxxxxxx-xxxx-…:…"><div class="err" id="er-rec"></div></div>
+      <button class="btn btn-primary full" id="rec-go">Recuperar</button>`);
+    $('rec-go').addEventListener('click', async () => {
+      const m = $('rec-code').value.trim().match(/^([0-9a-f-]{36}):([0-9a-f]{48})$/);
+      if (!m) { $('er-rec').textContent = 'El código no tiene el formato correcto. Cópialo entero, sin espacios.'; return; }
+      try {
+        await api('/api/creator', { action: 'me', creatorId: m[1], ownerToken: m[2] });
+        owned[m[1]] = m[2]; LS.set('rr-owned', owned);
+        toast('Acceso recuperado'); await load(); openCreator(m[1]);
+      } catch (e) { $('er-rec').textContent = e.message; }
+    });
+  });
+  $('cat-select').addEventListener('change', ev => { filter = ev.target.value; renderTabs(); renderList(); });
+  $('waitform').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const v = $('wait-email').value.trim(), m = $('wait-msg');
+    try {
+      await api('/api/waitlist', { email: v });
+      m.style.color = 'var(--gold)'; m.textContent = 'Apuntado. Te avisaremos el día del lanzamiento.';
+      $('wait-email').value = '';
+    } catch (e) { m.style.color = '#ffb4b4'; m.textContent = e.message; }
+  });
+
+  // ---------- ventanas ----------
+  const scrim = $('scrim'), sheet = $('sheet');
+  let lastFocus = null;
+  function openSheet(html) {
+    if (!scrim.classList.contains('open')) lastFocus = document.activeElement;
+    sheet.innerHTML = '<button class="x" id="x-close" aria-label="Cerrar">×</button>' + html;
+    scrim.classList.add('open'); sheet.scrollTop = 0;
+    $('x-close').addEventListener('click', closeSheet);
+    const f = sheet.querySelector('input:not([type=file]),select,button:not(.x)'); if (f) f.focus();
+  }
+  function closeSheet() { scrim.classList.remove('open'); sheet.innerHTML = ''; if (lastFocus && document.contains(lastFocus)) lastFocus.focus(); }
+  scrim.addEventListener('click', e => { if (e.target === scrim) closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && scrim.classList.contains('open')) closeSheet(); });
+
+  function amountField(value, min, max, hint, suffix) {
+    return `<div class="field"><label for="in-amt">Pagas</label>
+      <div class="amtwrap"><input id="in-amt" type="number" inputmode="numeric" min="${min}" max="${max}" step="1" value="${value}"><span id="amt-suf">${suffix || '€'}</span></div>
+      <div class="quick" id="quick"></div>
+      ${hint ? `<div class="hint">${hint}</div>` : ''}
+      <div class="err" id="er-amt"></div></div>`;
+  }
+
+  // foto: recorte cuadrado a 240 px
+  function squarePhoto(file) {
+    return new Promise((res, rej) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => {
+        const n = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas');
+        c.width = c.height = 240;
+        c.getContext('2d').drawImage(img, (img.naturalWidth - n) / 2, (img.naturalHeight - n) / 2, n, n, 0, 0, 240, 240);
+        URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', .85));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
+      img.src = url;
+    });
+  }
+
+  // ---------- ficha de comunidad ----------
+  function openCreator(id) {
+    const e = byId(id); if (!e) return;
+    const p = posOf(e), np = nichePos(total(e), e.cat, e.id), mine = isMine(e);
+    const fans = e.topFans || [], top = fans[0];
+    const myAmt = e.me ? e.me.amount : 0;
+    const need = top && !top.me ? top.amount + 1 - myAmt : 0;
+    const ach = achievements(e), sub = subOf(e.id);
+    const d = (ST.duels || []).find(x => x.status === 'active' && (x.a === e.id || x.b === e.id));
+    const incoming = (ST.duels || []).filter(x => x.status === 'pending' && x.b === e.id);
+    const outgoing = (ST.duels || []).find(x => x.status === 'pending' && x.a === e.id);
+    const busy = new Set((ST.duels || []).filter(x => x.status === 'pending' || x.status === 'active').flatMap(x => [x.a, x.b]));
+    const rivals = list().filter(x => x.id !== e.id && !busy.has(x.id));
+    openSheet(`
+      <div class="cs-head">${avatar(e)}<div style="min-width:0"><h3 id="sheet-title">${esc(e.name)}</h3>
+        <div class="meta">@${esc(e.handle)} ${verMark(e)} ${net(e.platform)} <span class="tag">${CATS[e.cat] || ''}</span></div></div></div>
+      <div class="facts num cs-facts">
+        <div><small>General</small><strong>#${p}</strong></div>
+        <div><small>${esc(CATS[e.cat] || 'Nicho')}</small><strong>#${np}</strong></div>
+        <div><small>Total</small><strong>${eur(total(e))}</strong></div>
+      </div>
+
+      ${mine && incoming.length ? `<div class="cs-sec"><h4>Te han retado</h4>${incoming.map(x => { const R = byId(x.a); return R ? `<p><b>${esc(R.name)}</b> te reta a un duelo de 24 horas.</p><div class="acts" style="margin-bottom:10px"><button class="btn btn-primary" data-accept="${x.id}">Aceptar</button><button class="btn btn-outline" data-decline="${x.id}">Rechazar</button></div>` : ''; }).join('')}</div>` : ''}
+
+      <div class="cs-sec"><h4>Meta de la comunidad</h4>
+        ${e.goal ? `<p>${esc(e.goal.text)}</p>${goalBar(e)}<p class="small num" style="margin-top:6px">${eur(Math.min(e.fans, e.goal.target))} de ${eur(e.goal.target)} aportados por sus fans${e.fans >= e.goal.target ? ' · ¡meta cumplida!' : ''}</p>`
+                 : `<p class="small">${mine ? 'Aún no tienes meta. Las metas animan a tus fans a aportar.' : 'Este creador aún no tiene meta.'}</p>`}
+        ${mine ? `<div class="inline" style="margin:8px 0 10px">
+            <input id="goal-text" maxlength="60" placeholder="Ej.: directo especial de 2 horas" value="${e.goal ? esc(e.goal.text) : ''}" aria-label="Qué harás al llegar a la meta">
+            <input id="goal-target" type="number" min="10" max="10000" placeholder="€" value="${e.goal ? e.goal.target : ''}" aria-label="Importe de la meta en euros">
+          </div><button class="btn btn-outline" id="goal-save">Guardar meta</button><div class="err" id="er-goal" style="font-size:12px;color:var(--alert);margin-top:6px"></div>` : ''}
+      </div>
+
+      ${d ? `<div class="cs-sec"><h4>En duelo</h4>${duelHTML(d)}</div>` : ''}
+
+      <div class="cs-sec"><h4>Logros</h4>
+        ${ach.length ? `<div class="badges">${ach.map(a => `<span class="badge">${esc(a)}</span>`).join('')}</div>` : '<p class="small">Aún sin logros esta temporada.</p>'}
+      </div>
+
+      <div class="cs-sec"><h4>Sus fans que más aportan</h4>
+        ${fans.length ? `<ol class="fanlist num">${fans.map((f, i) => `<li class="${f.me ? 'me' : ''}"><span class="fp">${i + 1}</span><span>${esc(f.nick)}${f.me ? ' (tú)' : ''}</span><span>${eur(f.amount)}</span></li>`).join('')}
+          ${e.me && e.me.pos > 5 ? `<li class="me"><span class="fp">${e.me.pos}</span><span>Tú</span><span>${eur(e.me.amount)}</span></li>` : ''}</ol>`
+          : '<p class="small">Nadie le ha apoyado todavía. El primero será su fan nº1.</p>'}
+        ${mine ? '' : `<div class="hook">${top && top.me ? '<b>Eres su fan nº1.</b> Si alguien te supera, perderás el título.' : `Aporta <b>${eur(Math.max(MIN, need || MIN))}</b> y serás su fan nº1.`}</div>`}
+      </div>
+
+      ${sub ? `<div class="cs-sec"><h4>Tu apoyo mensual</h4><p>Le apoyas con <b>${eur(sub.amount)} al mes</b>.</p><button class="btn btn-outline" id="unsub">Cancelar apoyo mensual</button></div>` : ''}
+
+      ${mine ? `<div class="cs-sec"><h4>Tu cuenta</h4>
+        <div class="acts" style="margin-bottom:10px">
+          <label class="btn btn-outline" for="cs-photo" style="cursor:pointer">Cambiar foto</label><input id="cs-photo" type="file" accept="image/*" style="position:absolute;left:-9999px">
+          <button class="btn btn-outline" data-copylink="${e.id}">Copiar mi enlace de apoyo</button>
+          ${e.verified ? '' : `<button class="btn btn-outline" data-verify="${e.id}">${e.verifyRequested ? 'Verificación pendiente' : 'Verificar mi cuenta'}</button>`}
+        </div>
+        <div class="inline" style="grid-template-columns:1fr auto"><input id="cs-mail" type="email" placeholder="Email para avisarte si te superan" aria-label="Email para avisos"><button class="btn btn-outline" id="cs-mail-save">Guardar</button></div>
+        <div class="err" id="er-acc" style="font-size:12px;color:var(--alert);margin-top:6px"></div>
+      </div>` : ''}
+
+      ${mine && !d ? `<div class="cs-sec"><h4>Retar a un duelo</h4>
+        ${outgoing ? `<p class="small">Esperando a que ${esc(byId(outgoing.b)?.name || 'tu rival')} acepte tu reto.</p>`
+          : rivals.length ? `<p class="small">24 horas. Gana el creador cuya comunidad aporte más durante el duelo. El retado tiene que aceptar.</p>
+            <div class="inline" style="grid-template-columns:1fr auto"><select id="rival" aria-label="Elige rival">${rivals.map(x => `<option value="${x.id}">${esc(x.name)} · #${posOf(x)}</option>`).join('')}</select>
+            <button class="btn btn-primary" id="duel-go">Enviar reto</button></div>` : '<p class="small">Ahora mismo no hay rivales libres.</p>'}</div>` : ''}
+
+      <div class="acts" style="margin-top:18px">
+        <button class="btn btn-gold" data-support="${e.id}">Apoyar una vez</button>
+        ${sub ? '' : `<button class="btn btn-outline" data-monthly="${e.id}">Apoyar cada mes</button>`}
+        <a class="btn btn-outline" href="${esc(e.url)}" target="_blank" rel="noopener nofollow ugc" data-click="${e.id}">Visitar perfil</a>
+      </div>`);
+
+    const act = async (body, okMsg, errEl) => {
+      try { await api('/api/creator', { creatorId: e.id, ownerToken: owned[e.id], ...body }); if (okMsg) toast(okMsg); await load(); openCreator(e.id); }
+      catch (err) { if (errEl && $(errEl)) $(errEl).textContent = err.message; else toast(err.message, true); }
+    };
+    if (mine) {
+      $('goal-save').addEventListener('click', () => {
+        const text = $('goal-text').value.trim(), target = Math.floor(+$('goal-target').value || 0);
+        if (text && target < 10) { $('er-goal').textContent = 'Pon un importe de al menos 10 €.'; return; }
+        act({ action: 'goal', text, target }, text ? 'Meta guardada' : 'Meta quitada', 'er-goal');
+      });
+      $('cs-photo').addEventListener('change', async ev => {
+        const f = ev.target.files && ev.target.files[0]; if (!f) return;
+        if (!/^image\//.test(f.type)) { $('er-acc').textContent = 'Ese archivo no es una imagen.'; return; }
+        try { act({ action: 'photo', photo: await squarePhoto(f) }, 'Foto actualizada', 'er-acc'); } catch (err) { $('er-acc').textContent = 'No se pudo leer la imagen. Prueba con otra.'; }
+      });
+      api('/api/creator', { action: 'me', creatorId: e.id, ownerToken: owned[e.id] }).then(r => { if ($('cs-mail')) $('cs-mail').value = r.alertEmail || ''; }).catch(() => {});
+      $('cs-mail-save').addEventListener('click', () => act({ action: 'alert', email: $('cs-mail').value.trim() }, 'Avisos guardados', 'er-acc'));
+      if ($('duel-go')) $('duel-go').addEventListener('click', () => act({ action: 'challenge', rivalId: $('rival').value }, 'Reto enviado. Tu rival tiene que aceptarlo.'));
+      sheet.querySelectorAll('[data-accept]').forEach(b => b.addEventListener('click', () => act({ action: 'accept', duelId: b.dataset.accept }, '¡Duelo aceptado! Empiezan 24 horas.')));
+      sheet.querySelectorAll('[data-decline]').forEach(b => b.addEventListener('click', () => act({ action: 'decline', duelId: b.dataset.decline }, 'Reto rechazado')));
+    }
+    if ($('unsub')) $('unsub').addEventListener('click', async () => {
+      try { await api('/api/cancel-sub', { fanToken, creatorId: e.id }); toast('Apoyo mensual cancelado. No se te cobrará más.'); await load(); openCreator(e.id); }
+      catch (err) { toast(err.message, true); }
+    });
+  }
+
+  // ---------- apoyo de fans ----------
+  function openSupport(id, monthly) {
+    const e = byId(id); if (!e) return;
+    const all = list(), p = all.indexOf(e);
+    const above = p > 0 ? all[p - 1] : null;
+    const need = above ? total(above) + 1 - total(e) : 0;
+    const start = Math.min(FAN_MAX, Math.max(MIN, need || 5));
+    let mode = monthly ? 'month' : 'once';
+    openSheet(`
+      <h3 id="sheet-title">Apoyar a ${esc(e.name)}</h3>
+      <p class="lead">Lo que aportes se suma a su puesto. Ahora va #${p + 1} con ${eur(total(e))} y ${int(e.supporters)} fans.</p>
+      <form id="supform" novalidate>
+        <div class="field"><span class="lbl" id="lbl-mode">Tipo de apoyo</span>
+          <div class="seg" role="group" aria-labelledby="lbl-mode">
+            <button type="button" data-mode="once" aria-pressed="${mode === 'once'}">Una vez</button>
+            <button type="button" data-mode="month" aria-pressed="${mode === 'month'}">Cada mes</button>
+          </div>
+          <div class="hint" id="mode-hint"></div></div>
+        ${amountField(start, MIN, FAN_MAX, `Entre ${MIN} y ${FAN_MAX} € por pago.`, mode === 'month' ? '€/mes' : '€')}
+        <div class="field"><label for="in-nick">Tu apodo</label>
+          <input id="in-nick" maxlength="20" placeholder="Sale en su lista de fans" autocomplete="nickname" value="${esc(myNick)}"></div>
+        <div class="preview" id="preview" aria-live="polite"></div>
+        <button class="btn btn-primary full" type="submit">Continuar al pago</button>
+      </form>`);
+    const quick = [3, 5, 10, 20];
+    if (need >= MIN && need <= FAN_MAX && !quick.includes(need)) quick.push(need);
+    $('quick').innerHTML = quick.sort((a, b) => a - b).map(v => `<button type="button" data-a="${v}">${eur(v)}${v === need ? ` · sube al #${p}` : ''}</button>`).join('');
+    $('quick').addEventListener('click', ev => { const b = ev.target.closest('[data-a]'); if (b) { $('in-amt').value = b.dataset.a; upd(); } });
+    sheet.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+      mode = b.dataset.mode;
+      sheet.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b));
+      upd();
+    }));
+    function upd() {
+      $('amt-suf').textContent = mode === 'month' ? '€/mes' : '€';
+      $('mode-hint').textContent = mode === 'month' ? 'Se cobra hoy y cada mes, y suma a la temporada en curso. Cancela cuando quieras desde su comunidad.' : 'Un solo pago para esta temporada.';
+      const a = Math.floor(+$('in-amt').value || 0);
+      const np = positionFor(total(e) + a, e.id);
+      const top = (e.topFans || [])[0];
+      const willTop = myAmtOf(e) + a > (top && !top.me ? top.amount : 0);
+      $('preview').innerHTML = a >= MIN && a <= FAN_MAX
+        ? `Con tu apoyo ${np < p + 1 ? 'sube al' : 'sigue en el'} puesto <b>#${np}</b>${np === 1 && p > 0 ? ' · le das el trono' : ''}${willTop ? '<br>Y te conviertes en su <b>fan nº1</b>' : ''}`
+        : `Elige entre ${MIN} y ${FAN_MAX} €`;
+    }
+    $('in-amt').addEventListener('input', upd); upd();
+    $('supform').addEventListener('submit', ev => {
+      ev.preventDefault();
+      const a = Math.floor(+$('in-amt').value || 0);
+      if (a < MIN || a > FAN_MAX) { $('er-amt').textContent = `Elige una cantidad entre ${MIN} y ${FAN_MAX} €.`; $('in-amt').focus(); return; }
+      const nick = $('in-nick').value.trim();
+      if (nick) { myNick = nick; LS.set('rr-nick', nick); }
+      const m = mode === 'month';
+      paySheet({
+        amount: a, monthly: m,
+        rows: [['Apoyas a', `@${e.handle}`], ['Tipo', m ? 'Mensual, se renueva cada mes' : 'Pago único'], ['Puesto tras pagar', `#${positionFor(total(e) + a, e.id)}`]],
+        pay: async () => {
+          const r = await api('/api/checkout', { kind: 'fan', creatorId: e.id, amount: a, monthly: m, nick: nick || myNick, fanToken });
+          location.href = r.url;
+        }
+      });
+    });
+  }
+  const myAmtOf = e => e.me ? e.me.amount : 0;
+
+  // ---------- puja de creador ----------
+  function openBid({ target, topUpId }) {
+    const all = list();
+    const me = topUpId ? byId(topUpId) : null;
+    const form = { platform: 'tiktok', urlTouched: false, amount: MIN };
+    if (target !== undefined && all[target]) form.amount = Math.max(MIN, total(all[target]) + 1);
+    if (me) { const p = all.indexOf(me); form.amount = p > 0 ? Math.max(MIN, total(all[p - 1]) + 1 - total(me)) : 10; }
+    const title = me ? 'Subir tu puja' : target !== undefined ? `Quitar el puesto #${target + 1}` : 'Consigue tu puesto';
+    const lead = me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.';
+
+    openSheet(`
+      <h3 id="sheet-title">${title}</h3>
+      <p class="lead">${lead}</p>
+      <form id="bidform" novalidate>
+        ${me ? '' : `
+        <div class="field"><span class="lbl" id="lbl-plat">Red social</span>
+          <div class="seg" role="group" aria-labelledby="lbl-plat">
+            <button type="button" aria-pressed="true" data-p="tiktok">TikTok</button>
+            <button type="button" aria-pressed="false" data-p="instagram">Instagram</button>
+          </div></div>
+        <div class="field"><label for="in-handle">Usuario</label>
+          <input id="in-handle" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@tuusuario" maxlength="31">
+          <div class="err" id="er-handle"></div></div>
+        <div class="field"><label for="in-name">Nombre que se verá</label>
+          <input id="in-name" maxlength="28" placeholder="Tu nombre o el de tu cuenta"></div>
+        <div class="field"><span class="lbl" id="lbl-cat">Tu nicho</span>
+          <input id="in-catq" type="search" placeholder="Busca tu nicho: fútbol, coches, anime…" aria-label="Buscar nicho" autocomplete="off">
+          <div class="catgrid" role="group" aria-labelledby="lbl-cat">${Object.entries(CATS).map(([k, v]) => `<button type="button" data-cat="${k}" aria-pressed="false">${v}</button>`).join('')}</div>
+          <div class="hint">Compites en el ranking general y en el de tu nicho, que tiene su propio rey.</div>
+          <div class="err" id="er-cat"></div></div>
+        <div class="field"><label for="in-url">Enlace</label>
+          <input id="in-url" type="url" inputmode="url" placeholder="https://…" autocapitalize="off" spellcheck="false">
+          <div class="hint">Se rellena con tu perfil. Puedes cambiarlo por un vídeo concreto.</div>
+          <div class="err" id="er-url"></div></div>
+        <div class="field"><span class="lbl">Tu foto en el ranking (opcional)</span>
+          <div class="photo">
+            <span class="ph" id="ph-prev">Sin foto</span>
+            <label class="btn btn-outline" for="in-photo">Subir foto</label>
+            <input id="in-photo" type="file" accept="image/*">
+          </div>
+          <div class="hint">Sale en tu fila del ranking. Para el sello de verificado te daremos un código para tu bio.</div>
+          <div class="err" id="er-photo"></div></div>
+        <div class="field"><label for="in-mail">Email para avisarte si te superan</label>
+          <input id="in-mail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
+          <div class="hint">Opcional, pero es la mejor forma de enterarte a tiempo para recuperar tu puesto.</div>
+          <div class="err" id="er-mail"></div></div>`}
+        ${amountField(form.amount, MIN, CREATOR_MAX, `Mínimo ${MIN} €.`)}
+        <div class="preview" id="preview" aria-live="polite"></div>
+        <button class="btn btn-primary full" type="submit">Continuar al pago</button>
+      </form>`);
+
+    const base = me ? total(me) : 0;
+    const opts = all.slice(0, 5).map((e, i) => ({ i, e, need: Math.max(MIN, total(e) + 1 - base) })).filter(o => o.e !== me && total(o.e) >= base);
+    $('quick').innerHTML = opts.map(o => `<button type="button" data-a="${o.need}">#${o.i + 1} · ${eur(o.need)}</button>`).join('');
+    $('quick').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b) { $('in-amt').value = b.dataset.a; upd(); } });
+
+    function upd() {
+      const a = Math.floor(+$('in-amt').value || 0);
+      const t = base + a, p = positionFor(t, me && me.id);
+      const cat = me ? me.cat : form.cat;
+      const np = cat ? nichePos(t, cat, me && me.id) : 0;
+      $('preview').innerHTML = a >= MIN
+        ? `Con ${eur(a)} ${me ? `sumas ${eur(t)} y ` : ''}quedas en el puesto <b>#${p}</b>${p === 1 ? ' · el trono es tuyo' : ''}${cat ? `<br>En ${CATS[cat]}: <b>#${np}</b>${np === 1 ? ` · rey de ${CATS[cat]}` : ''}` : ''}`
+        : `Mínimo ${MIN} €`;
+    }
+    $('in-amt').addEventListener('input', upd);
+
+    if (!me) {
+      $('in-photo').addEventListener('change', async ev => {
+        const f = ev.target.files && ev.target.files[0]; if (!f) return;
+        $('er-photo').textContent = '';
+        if (!/^image\//.test(f.type)) { $('er-photo').textContent = 'Ese archivo no es una imagen. Sube un JPG, PNG o WEBP.'; return; }
+        try { form.photo = await squarePhoto(f); $('ph-prev').innerHTML = `<img src="${form.photo}" alt="">`; }
+        catch (err) { $('er-photo').textContent = 'No se pudo leer la imagen. Prueba con otra.'; }
+      });
+      const hIn = $('in-handle'), uIn = $('in-url');
+      const syncUrl = () => { if (!form.urlTouched) { const h = hIn.value.trim().replace(/^@/, ''); uIn.value = h ? profileUrl(form.platform, h) : ''; } };
+      sheet.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
+        form.platform = b.dataset.p;
+        sheet.querySelectorAll('[data-p]').forEach(x => x.setAttribute('aria-pressed', x === b));
+        syncUrl();
+      }));
+      hIn.addEventListener('input', syncUrl);
+      uIn.addEventListener('input', () => { form.urlTouched = uIn.value.trim() !== ''; });
+      const norm = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      $('in-catq').addEventListener('input', ev => {
+        const q = norm(ev.target.value.trim());
+        sheet.querySelectorAll('[data-cat]').forEach(b => {
+          const hay = norm(b.textContent + ' ' + b.dataset.cat + ' ' + (SYN[b.dataset.cat] || ''));
+          b.hidden = !!q && !hay.includes(q) && b.getAttribute('aria-pressed') !== 'true';
+        });
+      });
+      sheet.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => {
+        form.cat = b.dataset.cat;
+        sheet.querySelectorAll('[data-cat]').forEach(x => x.setAttribute('aria-pressed', x === b));
+        $('er-cat').textContent = ''; upd();
+      }));
+    }
+    upd();
+
+    $('bidform').addEventListener('submit', ev => {
+      ev.preventDefault();
+      let first = null, catErr = false;
+      const setErr = (id, msg, focusId) => { const el = $(id); if (el) el.textContent = msg; if (msg && !first) first = focusId; };
+      if (!me) {
+        form.handle = $('in-handle').value.trim().replace(/^@/, '');
+        form.name = $('in-name').value.trim() || form.handle;
+        form.url = $('in-url').value.trim();
+        form.mail = $('in-mail').value.trim();
+        setErr('er-handle', /^[A-Za-z0-9._]{2,30}$/.test(form.handle) ? '' : 'Escribe tu usuario: letras, números, puntos o guiones bajos.', 'in-handle');
+        if (!form.cat) { $('er-cat').textContent = 'Elige tu nicho para entrar también en su ranking.'; catErr = true; }
+        let u = null; try { u = new URL(form.url); } catch (e) {}
+        setErr('er-url', u && u.protocol === 'https:' ? '' : 'Pega un enlace que empiece por https://', 'in-url');
+        setErr('er-mail', !form.mail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.mail) ? '' : 'Ese email no parece válido. Revísalo o déjalo vacío.', 'in-mail');
+        const dup = list().find(x => x.platform === form.platform && x.handle.toLowerCase() === form.handle.toLowerCase());
+        if (dup && !isMine(dup)) setErr('er-handle', 'Esta cuenta ya está en el ranking. Si es tuya y la registraste en otro dispositivo, escríbenos para recuperar el acceso.', 'in-handle');
+      }
+      form.amount = Math.floor(+$('in-amt').value || 0);
+      setErr('er-amt', form.amount >= MIN && form.amount <= CREATOR_MAX ? '' : `Elige una cantidad entre ${MIN} y 10.000 €.`, 'in-amt');
+      if (first || catErr) { if (first) $(first).focus(); else sheet.querySelector('[data-cat]').focus(); return; }
+      const t = base + form.amount;
+      paySheet({
+        amount: form.amount,
+        rows: [
+          ['Cuenta', me ? `@${me.handle} · ${me.platform === 'tiktok' ? 'TikTok' : 'Instagram'}` : `@${form.handle} · ${form.platform === 'tiktok' ? 'TikTok' : 'Instagram'}`],
+          ['Enlace', domain(me ? me.url : form.url)],
+          ...(me ? [['Llevas', eur(total(me))]] : []),
+          ['Puesto tras pagar', `#${positionFor(t, me && me.id)}`]
+        ],
+        pay: async () => {
+          const body = me ? { kind: 'bid', amount: form.amount, creatorId: me.id, ownerToken: owned[me.id] }
+            : { kind: 'bid', amount: form.amount, newCreator: { handle: form.handle, platform: form.platform, name: form.name, cat: form.cat, url: form.url, alertEmail: form.mail, photo: form.photo || '' } };
+          const r = await api('/api/checkout', body);
+          if (r.ownerToken) { owned[r.creatorId] = r.ownerToken; LS.set('rr-owned', owned); }
+          location.href = r.url;
+        }
+      });
+    });
+  }
+
+  // ---------- verificación ----------
+  async function verifyBox(e) {
+    let code = '…';
+    try { code = (await api('/api/creator', { action: 'me', creatorId: e.id, ownerToken: owned[e.id] })).verifyCode || '…'; } catch (err) {}
+    const red = e.platform === 'tiktok' ? 'TikTok' : 'Instagram';
+    return `<div class="box">
+      <span class="t">Demuestra que eres tú</span>
+      <span class="code num">${esc(code)}</span>
+      <ol>
+        <li>Pon este código en tu bio de ${red} (@${esc(e.handle)}).</li>
+        <li>Pulsa «Ya lo he puesto». Revisamos tu bio y te damos el sello de verificado.</li>
+        <li>Cuando lo tengas, ya puedes quitar el código.</li>
+      </ol>
+      <button class="btn btn-outline full" id="verify-go">${e.verifyRequested ? 'Solicitud enviada: la estamos revisando' : 'Ya lo he puesto'}</button>
+      <span class="note" style="margin:0">Sin verificar, tu fila sale como «Sin verificar» para que nadie se haga pasar por ti.</span>
+    </div>`;
+  }
+  function bindVerify(e) {
+    const b = $('verify-go'); if (!b) return;
+    if (e.verifyRequested) b.disabled = true;
+    b.addEventListener('click', async () => {
+      b.disabled = true; b.textContent = 'Enviando…';
+      try { await api('/api/creator', { action: 'verify', creatorId: e.id, ownerToken: owned[e.id] }); b.textContent = 'Solicitud enviada: la estamos revisando'; toast('Recibido. Revisaremos tu bio y te daremos el sello en cuanto lo comprobemos.'); load().catch(() => {}); }
+      catch (err) { b.disabled = false; b.textContent = 'Ya lo he puesto'; toast(err.message, true); }
+    });
+  }
+  async function openVerify(e) {
+    openSheet(`<h3 id="sheet-title">Verificar @${esc(e.handle)}</h3><p class="lead">El sello confirma a todo el mundo que este puesto lo ha pagado el dueño real de la cuenta.</p><div id="vbox">Cargando…</div>`);
+    $('vbox').outerHTML = await verifyBox(e);
+    bindVerify(e);
+  }
+
+  // ---------- pago ----------
+  function paySheet({ amount, rows, pay, monthly }) {
+    openSheet(`
+      <h3 id="sheet-title">Pago</h3>
+      <p class="lead">Revisa los datos. Al continuar irás a la página de pago seguro de Stripe.</p>
+      <div class="summary num">
+        ${rows.map(r => `<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join('')}
+        <div class="total"><span>${monthly ? 'Total al mes' : 'Total a pagar'}</span><span>${eur(amount)}</span></div>
+      </div>
+      <label class="check"><input type="checkbox" id="age"> <span>Tengo 18 años o más, pago con mi propia tarjeta y acepto las normas del sitio. ${monthly ? 'El apoyo se renueva cada mes hasta que lo canceles.' : 'Los pagos no son reembolsables.'}</span></label>
+      <button class="btn btn-primary full" id="paybtn" disabled>${monthly ? `Suscribirme por ${eur(amount)}/mes` : `Pagar ${eur(amount)}`}</button>
+      <div class="err" id="pay-err" style="font-size:13px;color:var(--alert);margin-top:10px" role="alert"></div>
+      <p class="note">Tarjeta, Apple Pay o Google Pay. El puesto se actualiza en cuanto Stripe confirma el pago.</p>`);
+    $('age').addEventListener('change', e => { $('paybtn').disabled = !e.target.checked; });
+    $('paybtn').addEventListener('click', async e => {
+      const b = e.currentTarget; b.disabled = true; const label = b.textContent; b.textContent = 'Abriendo el pago seguro…';
+      try { await pay(); }
+      catch (err) { $('pay-err').textContent = err.message; b.disabled = false; b.textContent = label; }
+    });
+  }
+
+  // ---------- vuelta desde Stripe ----------
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function handleReturn() {
+    const q = new URLSearchParams(location.search);
+    const state = q.get('pago');
+    if (!state) return;
+    history.replaceState(null, '', location.pathname === '/index.html' ? '/' : location.pathname);
+    if (state === 'cancelado') { toast('Pago cancelado. No se ha cobrado nada.'); return; }
+    const sid = q.get('sid');
+    if (state !== 'ok' || !sid) return;
+    openSheet('<h3 id="sheet-title">Confirmando tu pago…</h3><p class="lead">Un momento, estamos esperando la confirmación de Stripe.</p>');
+    let s = null;
+    for (let i = 0; i < 10; i++) { try { s = await api('/api/session?sid=' + encodeURIComponent(sid)); if (s.paid) break; } catch (e) {} await sleep(1500); }
+    if (!s || !s.paid) {
+      openSheet('<h3 id="sheet-title">Pago en proceso</h3><p class="lead">Stripe aún no ha confirmado el pago. En cuanto lo haga, aparecerá en el ranking. Si no se completa, no se te cobrará nada.</p><button class="btn btn-outline full" id="ok-close">Entendido</button>');
+      $('ok-close').addEventListener('click', closeSheet); return;
+    }
+    let e = null;
+    for (let i = 0; i < 8; i++) {
+      await load().catch(() => {});
+      e = byId(s.creatorId);
+      if (e && (s.kind === 'bid' || e.me)) break;
+      await sleep(1500);
+    }
+    if (!e) {
+      openSheet('<h3 id="sheet-title">¡Pago recibido!</h3><p class="lead">Ya lo tenemos. El ranking se actualizará en unos segundos.</p><button class="btn btn-outline full" id="ok-close">Ver el ranking</button>');
+      $('ok-close').addEventListener('click', closeSheet); return;
+    }
+    successSheet(e, posOf(e), s.kind === 'bid' ? 'creator' : 'fan', { isTop: !!(e.topFans[0] && e.topFans[0].me), monthly: s.monthly, amount: s.amount });
+  }
+
+  // ---------- imagen para historias 1080x1920 ----------
+  async function shareImage(e, p, kind, isTop) {
+    const DF = '"Libre Caslon Display", Georgia, serif', BF = '"Geist", system-ui, sans-serif';
+    try { await document.fonts.load(`400 100px ${DF}`); await document.fonts.load(`600 40px ${BF}`); } catch (err) {}
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1920;
+    const g = c.getContext('2d');
+    g.fillStyle = '#0b0b0c'; g.fillRect(0, 0, 1080, 1920);
+    const rg = g.createRadialGradient(780, 300, 50, 780, 300, 1200); rg.addColorStop(0, 'rgba(201,162,74,.22)'); rg.addColorStop(1, 'rgba(201,162,74,0)'); g.fillStyle = rg; g.fillRect(0, 0, 1080, 1920);
+    g.strokeStyle = '#b08d3a'; g.lineWidth = 3; g.strokeRect(60, 60, 960, 1800); g.strokeRect(76, 76, 928, 1768);
+    g.save(); g.translate(412, 210); g.scale(4, 4); g.fillStyle = '#b08d3a'; g.fill(new Path2D(CROWN_PATH)); g.fillRect(4, 42, 56, 7); g.restore();
+    g.textAlign = 'center';
+    const small = (t, y) => { g.fillStyle = '#c9cfd9'; g.font = `600 44px ${BF}`; g.fillText(t.toUpperCase().split('').join(String.fromCharCode(8202)), 540, y); };
+    if (kind === 'fan') {
+      small(isTop ? 'Soy el fan nº1 de' : 'He apoyado a', 600);
+      g.fillStyle = '#ffffff'; g.font = `400 120px ${DF}`; g.fillText('@' + e.handle, 540, 750, 900);
+      small('y ya va', 900);
+      g.fillStyle = '#d6b45e'; g.font = `400 440px ${DF}`; g.fillText(String(p), 540, 1290);
+    } else {
+      small('Estoy en el puesto', 600);
+      g.fillStyle = '#d6b45e'; g.font = `400 520px ${DF}`; g.fillText(String(p), 540, 1080);
+      g.fillStyle = '#ffffff'; g.font = `400 110px ${DF}`; g.fillText('@' + e.handle, 540, 1260, 900);
+    }
+    g.fillStyle = '#ffffff'; g.font = `600 46px ${BF}`;
+    g.fillText(kind === 'fan' ? '¿Le ayudas a llegar al trono?' : 'Apóyame para llegar al trono', 540, 1500);
+    g.fillStyle = '#b08d3a'; g.fillRect(440, 1570, 200, 2);
+    g.fillStyle = '#d6b45e'; g.font = `400 84px ${DF}`; g.fillText('EL REY DE', 540, 1690, 900); g.fillText('LAS REDES', 540, 1780, 900);
+    return c.toDataURL('image/png');
+  }
+
+  async function successSheet(e, p, kind, info) {
+    const np = nichePos(total(e), e.cat, e.id);
+    const vb = kind === 'creator' && isMine(e) && !e.verified ? await verifyBox(e) : '';
+    openSheet(`
+      <div class="done">
+        <h3 id="sheet-title">${kind === 'fan' ? (info.isTop ? '¡Eres su fan nº1!' : '¡Gracias por tu apoyo!') : `Estás en el #${p}`}</h3>
+        ${kind === 'creator' ? `<p class="lead" style="margin:0 0 6px;color:var(--gold-ink);font-weight:600">#${np} en ${CATS[e.cat]}${np === 1 ? ' · eres el rey de tu nicho' : ''}</p>` : ''}
+        <p class="lead">${kind === 'fan' ? `@${esc(e.handle)} va ahora #${p}.${info.monthly ? ` Tu apoyo de ${eur(info.amount)} se repetirá cada mes.` : ''} Sube esta imagen a tu historia para que se sumen más fans.` : 'Tu enlace ya recibe los clics de tu fila.'}</p>
+        ${vb}
+        ${kind === 'creator' ? `<div class="box gold">
+          <span class="t">Último paso: trae a tus seguidores</span>
+          <code id="sup-link">${esc(supportLink(e))}</code>
+          <button class="btn btn-primary full" id="copylink">Copiar mi enlace de apoyo</button>
+          <ol>
+            <li>Pégalo en tu bio de ${e.platform === 'tiktok' ? 'TikTok' : 'Instagram'}.</li>
+            <li>Sube la imagen de abajo a tus historias con el enlace.</li>
+            <li>Ponte una meta en tu comunidad: los fans aportan más cuando hay un objetivo.</li>
+          </ol>
+        </div>` : ''}
+        <img id="share-img" alt="Imagen para compartir en historias: ${kind === 'fan' ? `apoyo a @${esc(e.handle)}, puesto ${p}` : `@${esc(e.handle)} en el puesto ${p}`} de El Rey de las Redes">
+        <p class="note" style="margin:0 0 14px">Mantén pulsada la imagen para guardarla.</p>
+        <div style="display:grid;gap:8px">
+          <button class="btn btn-outline full" id="copyshare">Copiar texto para compartir</button>
+          <button class="btn btn-outline full" id="seeme">${kind === 'creator' ? 'Ir a mi comunidad' : 'Ver el ranking'}</button>
+        </div>
+      </div>`);
+    bindVerify(e);
+    if ($('copylink')) $('copylink').addEventListener('click', () => copyText(supportLink(e), 'Enlace copiado: pégalo en tu bio'));
+    $('copyshare').addEventListener('click', () => copyText(kind === 'fan'
+      ? `${info.isTop ? 'Soy el fan nº1 de' : 'He apoyado a'} @${e.handle} en El Rey de las Redes y ya va #${p}. ¿Le ayudas a llegar al trono? ${supportLink(e)}`
+      : `Estoy en el puesto #${p} de El Rey de las Redes. Apóyame para llegar al trono 👑 ${supportLink(e)}`, 'Texto copiado'));
+    $('seeme').addEventListener('click', () => { if (kind === 'creator') openCreator(e.id); else { closeSheet(); (p === 1 ? $('throne') : $('ranking')).scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+    const url = await shareImage(e, p, kind, info.isTop);
+    const img = $('share-img'); if (img) img.src = url;
+  }
+
+  // ---------- textos legales ----------
+  function legalTexts() {
+    const L = ST?.legal || {}, owner = L.name || '[nombre del titular]', nif = L.nif || '[NIF]', mail = L.email || '[email de contacto]';
+    return {
+      rules: ['Normas', [
+        'El puesto depende del total de la temporada: lo que paga el creador más lo que aportan sus fans. En caso de empate gana quien llegó antes.',
+        'Cada creador elige un nicho y compite a la vez en el ranking general y en el de su nicho. Cada lunes a las 00:00 (hora de Madrid) se cierra la temporada, el número 1 entra en el salón de reyes y el ranking empieza de cero.',
+        'Solo pueden pagar mayores de 18 años con su propia tarjeta. Los creadores pagan desde 3 €. Los fans aportan entre 3 y 20 € por pago, una vez o cada mes. El apoyo mensual se puede cancelar en cualquier momento desde la comunidad del creador. Los pagos no son reembolsables.',
+        'Los duelos duran 24 horas y los acepta el creador retado. Gana la comunidad que más aporte durante el duelo. El premio es visibilidad y el logro, nunca dinero.',
+        'Las metas las fija cada creador y él es responsable de cumplirlas.',
+        'Para el sello de verificado hay que poner en la bio el código que te damos. Las fotos deben ser tuyas: retiramos sin reembolso las de otras personas o con contenido inapropiado.',
+        'Solo se admiten enlaces a perfiles o contenidos propios. Retiramos sin reembolso las cuentas que suplanten a otra persona y los enlaces a estafas, contenido adulto, odio o material de terceros.',
+        'Aportar no da derecho a ningún premio ni sorteo: es apoyo y visibilidad para el creador.'
+      ]],
+      privacy: ['Privacidad', [
+        `Responsable: ${owner} (${nif}). Contacto: ${mail}.`,
+        'Guardamos el usuario, nombre visible, enlace, foto e importes de los creadores; el apodo y los importes de los fans; y, si lo das, tu email para avisarte cuando te superen. Los usamos solo para mostrar el ranking y avisarte.',
+        'Los pagos los procesa Stripe: nunca vemos ni guardamos los datos de tu tarjeta. Los datos del ranking se alojan en Supabase, en servidores de la Unión Europea.',
+        `Puedes pedir el acceso, la corrección o el borrado de tus datos escribiendo a ${mail}.`
+      ]],
+      cookies: ['Cookies', [
+        'Usamos el almacenamiento local de tu navegador para recordar tus apoyos, tu apodo y el acceso a tu cuenta de creador. No usamos cookies de publicidad ni de seguimiento.',
+        'Stripe puede usar sus propias cookies en la página de pago para prevenir el fraude.'
+      ]],
+      aviso: ['Aviso legal', [
+        `Titular del sitio: ${owner}. NIF: ${nif}. Contacto: ${mail}.`,
+        'El Rey de las Redes es un servicio de visibilidad para creadores de contenido: los usuarios pagan por posicionarse en un ranking público. No es un juego de azar ni ofrece premios en dinero.',
+        'TikTok e Instagram son marcas de sus respectivos dueños. Este sitio no está afiliado ni patrocinado por ellas.'
+      ]]
+    };
+  }
+  function openLegal(k) {
+    const [t, ps] = legalTexts()[k];
+    openSheet(`<h3 id="sheet-title">${t}</h3><div class="legal">${ps.map(p => `<p>${esc(p)}</p>`).join('')}</div><button class="btn btn-outline full" id="legal-ok">Entendido</button>`);
+    $('legal-ok').addEventListener('click', closeSheet);
+  }
+  sheet.addEventListener('click', ev => { const a = ev.target.closest('a[data-legal]'); if (a) ev.preventDefault(); });
+
+  let tt;
+  function toast(msg, alert) {
+    const el = $('toast'); el.textContent = msg; el.classList.toggle('alert', !!alert); el.classList.add('show');
+    clearTimeout(tt); tt = setTimeout(() => el.classList.remove('show'), alert ? 5000 : 3000);
+  }
+
+  function openFromPath() {
+    const m = location.pathname.match(/^\/@([A-Za-z0-9._]{2,30})\/?$/);
+    if (!m) return;
+    const e = list().find(x => x.handle.toLowerCase() === m[1].toLowerCase());
+    if (e) openSupport(e.id, false); else toast(`@${m[1]} no está en el ranking esta temporada`);
+  }
+
+  // ---------- arranque ----------
+  (async () => {
+    try { await load(); }
+    catch (e) { $('throne').innerHTML = `<p style="margin:0;color:var(--muted)">${esc(e.message)}</p>`; return; }
+    if (new URLSearchParams(location.search).get('pago')) await handleReturn(); else openFromPath();
+    setInterval(() => {
+      if (document.visibilityState === 'visible' && !scrim.classList.contains('open')) load().catch(() => {});
+    }, 15000);
+  })();
+})();
+</script>
+</body>
+</html>

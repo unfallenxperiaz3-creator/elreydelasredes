@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Administración · El Rey de las Redes</title>
+<style>
+:root{--bg:#0b0b0c;--surface:#141416;--ink:#f3ede0;--muted:#9a9488;--line:#2a2824;--gold:#c9a24a;--alert:#e05252;--ok:#3fae6b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+h1{font-family:Georgia,serif;font-weight:400;font-size:30px;margin:0 0 4px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:30px 0 10px;font-weight:600}
+.muted{color:var(--muted)}
+input,button{font:inherit}
+input{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:10px 12px}
+button{background:transparent;border:1px solid #3a362f;color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px}
+button:hover{border-color:var(--gold)}
+button.pri{background:var(--gold);border-color:var(--gold);color:#0b0b0c;font-weight:600}
+button.danger{border-color:#5a2a2a;color:#ff9a9a}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.card b{display:block;font-family:Georgia,serif;font-weight:400;font-size:26px}
+.table{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-top:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+th{border-top:0;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+td img{width:32px;height:32px;border-radius:50%;object-fit:cover;vertical-align:middle}
+td .acts{display:flex;gap:6px;flex-wrap:wrap}
+a{color:var(--gold)}
+.pill{font-size:11px;border-radius:999px;padding:1px 8px;border:1px solid var(--line)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}
+.pill.no{border-color:var(--alert);color:var(--alert)}
+#login{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+#msg{min-height:1.4em;margin-top:8px}
+.token{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;background:var(--surface);border:1px solid var(--gold);border-radius:8px;padding:10px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Administración</h1>
+  <p class="muted">El Rey de las Redes · solo para ti.</p>
+  <form id="login">
+    <input id="pw" type="password" placeholder="Contraseña de administrador" autocomplete="current-password" aria-label="Contraseña">
+    <button class="pri" type="submit">Entrar</button>
+  </form>
+  <div id="msg" role="status"></div>
+  <div id="app" hidden></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const eur = c => (c / 100).toLocaleString('es-ES') + ' €';
+  const fmt = t => new Date(t).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  let pw = sessionStorage.getItem('rr-admin') || '';
+
+  async function call(method, body) {
+    const r = await fetch('/api/admin', { method, headers: { 'x-admin-password': pw, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Error');
+    return d;
+  }
+
+  async function load() {
+    const d = await call('GET');
+    $('login').hidden = true; $('app').hidden = false; $('msg').textContent = '';
+    const names = Object.fromEntries(d.creators.map(c => [c.id, '@' + c.handle]));
+    const pending = d.creators.filter(c => c.verify_requested_at && !c.verified);
+    $('app').innerHTML = `
+      <h2>Resumen · temporada ${esc(d.season)}</h2>
+      <div class="cards">
+        <div class="card"><span class="muted">Cobrado esta temporada*</span><b>${(d.seasonTotalShown).toLocaleString('es-ES')} €</b></div>
+        <div class="card"><span class="muted">Creadores</span><b>${d.creators.length}</b></div>
+        <div class="card"><span class="muted">Apoyos mensuales activos</span><b>${d.activeSubs}</b></div>
+        <div class="card"><span class="muted">Lista de espera</span><b>${d.waitlist}</b></div>
+      </div>
+      <p class="muted" style="font-size:12px">* De los últimos 100 pagos. El dato exacto, con comisiones, está en tu panel de Stripe.</p>
+
+      <h2>Verificaciones pendientes (${pending.length})</h2>
+      ${pending.length ? `<div class="table"><table><tr><th>Cuenta</th><th>Código que debe tener en la bio</th><th>Pedido</th><th></th></tr>
+        ${pending.map(c => `<tr><td><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.platform)} · @${esc(c.handle)}</a></td><td><b>${esc(c.verify_code)}</b></td><td>${fmt(c.verify_requested_at)}</td>
+          <td><div class="acts"><button class="pri" data-a="approve" data-id="${c.id}">Aprobar</button><button data-a="reject" data-id="${c.id}">Rechazar</button></div></td></tr>`).join('')}</table></div>
+        <p class="muted" style="font-size:13px">Abre el perfil, comprueba que el código está en la bio y aprueba.</p>` : '<p class="muted">Nada pendiente.</p>'}
+
+      <h2>Creadores</h2>
+      <div class="table"><table><tr><th></th><th>Cuenta</th><th>Estado</th><th>Clics</th><th>Alta</th><th></th></tr>
+        ${d.creators.map(c => `<tr>
+          <td>${c.photo_url ? `<img src="${esc(c.photo_url)}" alt="">` : ''}</td>
+          <td>${esc(c.name)}<br><a href="${esc(c.url)}" target="_blank" rel="noopener" class="muted">${esc(c.platform)} · @${esc(c.handle)}</a></td>
+          <td>${c.verified ? '<span class="pill ok">Verificado</span>' : '<span class="pill">Sin verificar</span>'} ${c.hidden ? '<span class="pill no">Oculto</span>' : ''}</td>
+          <td>${c.clicks}</td><td>${fmt(c.created_at)}</td>
+          <td><div class="acts">
+            ${c.verified ? `<button data-a="unverify" data-id="${c.id}">Quitar sello</button>` : `<button data-a="approve" data-id="${c.id}">Verificar</button>`}
+            ${c.hidden ? `<button data-a="unhide" data-id="${c.id}">Mostrar</button>` : `<button class="danger" data-a="hide" data-id="${c.id}">Ocultar</button>`}
+            ${c.photo_url ? `<button class="danger" data-a="removePhoto" data-id="${c.id}">Quitar foto</button>` : ''}
+            <button data-a="resetOwner" data-id="${c.id}" title="Genera un acceso nuevo para el dueño real">Nuevo acceso</button>
+          </div></td></tr>`).join('') || '<tr><td colspan="6" class="muted">Aún no hay creadores.</td></tr>'}
+      </table></div>
+      <div id="token-out"></div>
+
+      <h2>Últimos pagos</h2>
+      <div class="table"><table><tr><th>Fecha</th><th>Tipo</th><th>Creador</th><th>Fan</th><th>Importe</th></tr>
+        ${d.payments.map(p => `<tr><td>${fmt(p.created_at)}</td><td>${p.kind === 'bid' ? 'Puja' : p.monthly ? 'Apoyo mensual' : 'Apoyo'}</td><td>${esc(names[p.creator_id] || '—')}</td><td>${esc(p.nick || '')}</td><td>${eur(p.amount_cents)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Aún no hay pagos.</td></tr>'}
+      </table></div>`;
+  }
+
+  $('login').addEventListener('submit', async ev => {
+    ev.preventDefault(); pw = $('pw').value;
+    try { await load(); sessionStorage.setItem('rr-admin', pw); } catch (e) { $('msg').textContent = e.message; }
+  });
+  document.addEventListener('click', async ev => {
+    const b = ev.target.closest('button[data-a]'); if (!b) return;
+    const a = b.dataset.a;
+    if (['hide', 'removePhoto', 'resetOwner'].includes(a) && !confirmInline(b)) return;
+    b.disabled = true;
+    try {
+      const r = await call('POST', { action: a, creatorId: b.dataset.id });
+      await load();
+      if (r.ownerToken) $('token-out').innerHTML = `<div class="token">Acceso nuevo creado. Envíaselo al dueño real de la cuenta para que lo pegue en la web (Comunidad → Recuperar acceso):<br><br>${esc(b.dataset.id)}:${esc(r.ownerToken)}</div>`;
+    } catch (e) { $('msg').textContent = e.message; b.disabled = false; }
+  });
+  // Doble pulsación para acciones delicadas, sin ventanas emergentes
+  function confirmInline(b) {
+    if (b.dataset.armed) return true;
+    b.dataset.armed = '1'; const t = b.textContent; b.textContent = '¿Seguro? Pulsa otra vez';
+    setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = t; } }, 3000);
+    return false;
+  }
+  if (pw) load().catch(() => { pw = ''; sessionStorage.removeItem('rr-admin'); });
+})();
+</script>
+</body>
+</html>
