@@ -26,7 +26,7 @@ export async function GET(request) {
       db().from('duels').select('winner').eq('status', 'done').not('winner', 'is', null),
       db().from('hall').select('season,creator_id,name,handle,total_cents,fans').order('season', { ascending: false }),
       fetchAll(() => db().from('king_log').select('season,creator_id,since').order('since')),
-      db().from('payments').select('amount_cents,creator_id').order('amount_cents', { ascending: false }).limit(1),
+      db().from('payments').select('amount_cents,creator_id').order('amount_cents', { ascending: false }).limit(20),
       fan ? db().from('subscriptions').select('creator_id,amount_cents').eq('fan_token', fan).eq('status', 'active') : Promise.resolve({ data: [] })
     ]);
     for (const r of [duelsRes, winsRes, hallRes, bigRes, subsRes]) if (r.error) throw r.error;
@@ -59,15 +59,16 @@ export async function GET(request) {
       const end = next && next.season === k.season ? new Date(next.since).getTime()
         : k.season === season ? now : new Date(seasonEndsAt(new Date(k.since))).getTime();
       const ms = end - new Date(k.since).getTime();
-      if (!longest || ms > longest.ms) longest = { creatorId: k.creator_id, ms };
+      if (byId.has(k.creator_id) && !byId.get(k.creator_id).hidden && (!longest || ms > longest.ms)) longest = { creatorId: k.creator_id, ms };
       if (k.season === season && !next) kingSince = k.since;
     }
     const lastKing = [...kings].reverse().find(k => k.season === season);
     if (!ranked[0] || !lastKing || lastKing.creator_id !== ranked[0].id) kingSince = ranked[0]?.firstPaid || null;
 
     const today = madridDay();
-    const todayCents = payments.filter(p => madridDay(new Date(p.created_at)) === today).reduce((s, p) => s + p.amount_cents, 0);
-    const big = bigRes.data[0];
+    const visible = id => byId.has(id) && !byId.get(id).hidden;
+    const todayCents = payments.filter(p => visible(p.creator_id) && madridDay(new Date(p.created_at)) === today).reduce((s, p) => s + p.amount_cents, 0);
+    const big = bigRes.data.find(p => visible(p.creator_id));
 
     const feed = payments.slice(-8).reverse().map(p => {
       const c = byId.get(p.creator_id);
