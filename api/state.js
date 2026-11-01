@@ -93,6 +93,7 @@ export async function GET(request) {
     });
   } catch (e) {
     console.error(e);
-    return fail('No se pudo cargar el ranking. Inténtalo de nuevo en unos segundos.', 500);
+    const detail = String(e?.message || e?.code || e).replace(/(sb_secret_|sk_live_|sk_test_|whsec_|eyJ)[A-Za-z0-9._-]+/g, '[oculto]').slice(0, 200);
+    return json({ error: 'No se pudo cargar el ranking. Inténtalo de nuevo en unos segundos.', detail }, 500);
   }
 }
