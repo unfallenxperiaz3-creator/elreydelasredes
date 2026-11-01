@@ -367,6 +367,7 @@ footer .demo{margin-left:auto}
     <button data-legal="rules">Normas</button>
     <button data-legal="privacy">Privacidad</button>
     <button data-legal="cookies">Cookies</button>
+    <button id="contact">Contacto y colaboraciones</button>
     <button data-legal="aviso">Aviso legal</button>
     <button id="recover">Recuperar acceso de creador</button>
     <span class="demo">© El Rey de las Redes · Pagos seguros con Stripe</span>
@@ -667,6 +668,21 @@ footer .demo{margin-left:auto}
     const l = ev.target.closest('[data-legal]'); if (l) openLegal(l.dataset.legal);
   });
   $('cta-main').addEventListener('click', () => openBid({}));
+  $('contact').addEventListener('click', () => {
+    const mail = ST?.legal?.email || '';
+    openSheet(`<h3 id="sheet-title">Contacto y colaboraciones</h3>
+      <p class="lead">Escríbenos para lo que necesites:</p>
+      <div class="legal">
+        <p><b style="color:var(--ink)">Dudas y ayuda:</b> pagos, verificación, recuperar el acceso a tu cuenta o cualquier problema con la web.</p>
+        <p><b style="color:var(--ink)">Colaboraciones y propuestas:</b> marcas, agencias, creadores que quieran organizar algo especial o cualquier propuesta de negocio.</p>
+      </div>
+      ${mail ? `<div class="box" style="text-align:center"><code style="font-size:16px">${esc(mail)}</code>
+        <button class="btn btn-primary full" id="copy-mail">Copiar email</button>
+        <a class="btn btn-outline full" href="mailto:${esc(mail)}?subject=${encodeURIComponent('El Rey de las Redes')}">Abrir mi correo</a></div>`
+        : '<p class="lead">El email de contacto estará disponible muy pronto.</p>'}
+      <p class="note">Solemos responder en 24-48 horas.</p>`);
+    if ($('copy-mail')) $('copy-mail').addEventListener('click', () => copyText(mail, 'Email copiado'));
+  });
   $('recover').addEventListener('click', () => {
     openSheet(`<h3 id="sheet-title">Recuperar acceso</h3>
       <p class="lead">Si registraste tu cuenta en otro móvil o borraste el navegador, escríbenos desde tu red social o por email. Tras comprobar que eres tú, te mandaremos un código de acceso para pegarlo aquí.</p>
