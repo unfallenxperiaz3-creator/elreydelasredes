@@ -775,7 +775,6 @@ footer .demo{margin-left:auto}
           <button class="btn btn-outline" data-copylink="${e.id}">Copiar mi enlace de apoyo</button>
           ${e.verified ? '' : `<button class="btn btn-outline" data-verify="${e.id}">${e.verifyRequested ? 'Verificación pendiente' : 'Verificar mi cuenta'}</button>`}
         </div>
-        <div class="inline" style="grid-template-columns:1fr auto"><input id="cs-mail" type="email" placeholder="Email para avisarte si te superan" aria-label="Email para avisos"><button class="btn btn-outline" id="cs-mail-save">Guardar</button></div>
         <div class="err" id="er-acc" style="font-size:12px;color:var(--alert);margin-top:6px"></div>
       </div>` : ''}
 
@@ -806,8 +805,6 @@ footer .demo{margin-left:auto}
         if (!/^image\//.test(f.type)) { $('er-acc').textContent = 'Ese archivo no es una imagen.'; return; }
         try { act({ action: 'photo', photo: await squarePhoto(f) }, 'Foto actualizada', 'er-acc'); } catch (err) { $('er-acc').textContent = 'No se pudo leer la imagen. Prueba con otra.'; }
       });
-      api('/api/creator', { action: 'me', creatorId: e.id, ownerToken: owned[e.id] }).then(r => { if ($('cs-mail')) $('cs-mail').value = r.alertEmail || ''; }).catch(() => {});
-      $('cs-mail-save').addEventListener('click', () => act({ action: 'alert', email: $('cs-mail').value.trim() }, 'Avisos guardados', 'er-acc'));
       if ($('duel-go')) $('duel-go').addEventListener('click', () => act({ action: 'challenge', rivalId: $('rival').value }, 'Reto enviado. Tu rival tiene que aceptarlo.'));
       sheet.querySelectorAll('[data-accept]').forEach(b => b.addEventListener('click', () => act({ action: 'accept', duelId: b.dataset.accept }, '¡Duelo aceptado! Empiezan 24 horas.')));
       sheet.querySelectorAll('[data-decline]').forEach(b => b.addEventListener('click', () => act({ action: 'decline', duelId: b.dataset.decline }, 'Reto rechazado')));
@@ -924,11 +921,7 @@ footer .demo{margin-left:auto}
             <input id="in-photo" type="file" accept="image/*">
           </div>
           <div class="hint">Usa la misma imagen de perfil que tienes en tu red, para que tus seguidores te reconozcan al momento. Sale en tu fila del ranking.</div>
-          <div class="err" id="er-photo"></div></div>
-        <div class="field"><label for="in-mail">Email para avisarte si te superan (opcional)</label>
-          <input id="in-mail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
-          <div class="hint">Solo te escribiremos si alguien te quita el puesto. Nada de publicidad.</div>
-          <div class="err" id="er-mail"></div></div>`}
+          <div class="err" id="er-photo"></div></div>`}
         ${invite ? `<label class="check"><input type="checkbox" id="inv-age"> <span>Tengo 18 años o más y acepto las normas del sitio.</span></label>
           <div class="err" id="er-inv" style="font-size:13px;color:var(--alert);margin:-6px 0 12px" role="alert"></div>`
           : `${amountField(form.amount, MIN, CREATOR_MAX, `Mínimo ${MIN} €.`)}
@@ -996,12 +989,11 @@ footer .demo{margin-left:auto}
         form.handle = $('in-handle').value.trim().replace(/^@/, '');
         form.name = $('in-name').value.trim() || form.handle;
         form.url = $('in-url').value.trim();
-        form.mail = $('in-mail').value.trim();
+        form.mail = '';
         setErr('er-handle', /^[A-Za-z0-9._-]{2,30}$/.test(form.handle) ? '' : 'Escribe tu usuario: letras, números, puntos, guiones o guiones bajos.', 'in-handle');
         if (!form.cat) { $('er-cat').textContent = 'Elige tu nicho para entrar también en su ranking.'; catErr = true; }
         let u = null; try { u = new URL(form.url); } catch (e) {}
         setErr('er-url', u && u.protocol === 'https:' ? '' : 'Pega un enlace que empiece por https://', 'in-url');
-        setErr('er-mail', !form.mail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.mail) ? '' : 'Ese email no parece válido. Revísalo o déjalo vacío.', 'in-mail');
         const dup = list().find(x => x.platform === form.platform && x.handle.toLowerCase() === form.handle.toLowerCase());
         if (dup && !isMine(dup)) setErr('er-handle', 'Esta cuenta ya está en el ranking. Si es tuya y la registraste en otro dispositivo, escríbenos para recuperar el acceso.', 'in-handle');
       }
@@ -1214,7 +1206,7 @@ footer .demo{margin-left:auto}
       ]],
       privacy: ['Privacidad', [
         `Responsable: ${owner} (${nif}). Contacto: ${mail}.`,
-        'Guardamos el usuario, nombre visible, enlace, foto e importes de los creadores; el apodo y los importes de los fans; y, si lo das, tu email para avisarte cuando te superen. Los usamos solo para mostrar el ranking y avisarte.',
+        'Guardamos el usuario, nombre visible, enlace, foto e importes de los creadores; y el apodo y los importes de los fans. Los usamos solo para mostrar el ranking.',
         'Los pagos los procesa Stripe: nunca vemos ni guardamos los datos de tu tarjeta. Los datos del ranking se alojan en Supabase, en servidores de la Unión Europea.',
         `Puedes pedir el acceso, la corrección o el borrado de tus datos escribiendo a ${mail}.`
       ]],
