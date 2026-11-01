@@ -67,9 +67,9 @@ Si algo falla: en Stripe → Webhooks → tu endpoint verás si los avisos llega
 
 ## 6. Tu dominio
 
-1. Vercel → proyecto → **Settings → Domains** → añade `elreydelasredes.com` y sigue las instrucciones de DNS que te da (se configuran en la web donde compraste el dominio).
-2. Cuando funcione, añade la variable `SITE_URL` = `https://elreydelasredes.com` y redespliega.
-3. En Stripe, edita el webhook y cambia la URL a `https://elreydelasredes.com/api/webhook`.
+1. Vercel → proyecto → **Settings → Domains** → añade `elreydelasredes.es` (Vercel deja `www.elreydelasredes.es` como principal) y pon en Nominalia, en *Editar zona DNS*, los registros que te da: un **A** para `@` y un **CNAME** para `www`. No toques los registros del correo (MX, TXT, SRV…).
+2. Cuando funcione, añade la variable `SITE_URL` = `https://www.elreydelasredes.es` y redespliega.
+3. En Stripe, edita el webhook y cambia la URL a `https://www.elreydelasredes.es/api/webhook` (con www: Stripe no sigue redirecciones).
 
 ## 7. Cobrar dinero real
 
@@ -86,7 +86,7 @@ Los pagos de prueba no aparecen en modo real: el ranking real empieza vacío.
 ## 8. Opcional: emails de «te han superado»
 
 1. Crea una cuenta en resend.com y verifica tu dominio.
-2. Añade en Vercel `RESEND_API_KEY` (tu clave de Resend) y `MAIL_FROM` (por ejemplo `El Rey de las Redes <avisos@elreydelasredes.com>`).
+2. Añade en Vercel `RESEND_API_KEY` (tu clave de Resend) y `MAIL_FROM` (por ejemplo `El Rey de las Redes <avisos@elreydelasredes.es>`).
 3. Redespliega. Desde ese momento, los creadores que dejen su email recibirán un aviso cuando alguien les adelante.
 
 ---
