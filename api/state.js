@@ -31,6 +31,7 @@ export async function GET(request) {
     ]);
     for (const r of [duelsRes, winsRes, hallRes, bigRes, subsRes]) if (r.error) throw r.error;
     const byId = new Map(creators.map(c => [c.id, c]));
+    const visible = id => byId.has(id) && !byId.get(id).hidden;
 
     // Duelos: cerrar los que han terminado y calcular marcadores
     const duels = [];
@@ -59,14 +60,13 @@ export async function GET(request) {
       const end = next && next.season === k.season ? new Date(next.since).getTime()
         : k.season === season ? now : new Date(seasonEndsAt(new Date(k.since))).getTime();
       const ms = end - new Date(k.since).getTime();
-      if (byId.has(k.creator_id) && !byId.get(k.creator_id).hidden && (!longest || ms > longest.ms)) longest = { creatorId: k.creator_id, ms };
+      if (visible(k.creator_id) && (!longest || ms > longest.ms)) longest = { creatorId: k.creator_id, ms };
       if (k.season === season && !next) kingSince = k.since;
     }
     const lastKing = [...kings].reverse().find(k => k.season === season);
     if (!ranked[0] || !lastKing || lastKing.creator_id !== ranked[0].id) kingSince = ranked[0]?.firstPaid || null;
 
     const today = madridDay();
-    const visible = id => byId.has(id) && !byId.get(id).hidden;
     const todayCents = payments.filter(p => visible(p.creator_id) && madridDay(new Date(p.created_at)) === today).reduce((s, p) => s + p.amount_cents, 0);
     const big = bigRes.data.find(p => visible(p.creator_id));
 
