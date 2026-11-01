@@ -192,14 +192,6 @@ img.avatar{object-fit:cover}
 .how p{margin:0;color:var(--muted);font-size:15px}
 @media (max-width:620px){.how{grid-template-columns:1fr;gap:18px}}
 
-.wait{margin:0 0 50px;border-radius:12px;padding:26px 24px;display:grid;gap:12px;background:linear-gradient(135deg,#1d180c,#121110);border:1px solid #5a4a22;color:var(--ink)}
-.wait h2{margin:0;font-family:var(--display);font-weight:400;font-size:34px;line-height:1}
-.wait p{margin:0;color:var(--muted);max-width:56ch}
-.wait form{display:flex;gap:8px;flex-wrap:wrap}
-.wait input{flex:1 1 220px;background:var(--bg);border:1px solid #3a362f;border-radius:6px;padding:11px 12px;color:var(--ink);font:inherit}
-.wait input::placeholder{color:#6f6a60}
-.wait input:focus{outline:none;border-color:var(--gold)}
-.wait .msg{font-size:14px;min-height:1.2em}
 
 footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:13px;background:#08080a}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
@@ -358,15 +350,6 @@ footer .demo{margin-left:auto}
     <div><h3><span>III</span>Cada lunes</h3><p>Se cierra la temporada. El número 1 entra en el salón de reyes, suma logros y el ranking empieza de cero.</p></div>
   </section>
 
-  <section class="wait" aria-labelledby="wait-h">
-    <h2 id="wait-h">Lista de espera</h2>
-    <p>Abrimos pronto. Apúntate y entra gratis en la semana de fundadores, antes de que empiecen las pujas.</p>
-    <form id="waitform" novalidate>
-      <input id="wait-email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" aria-label="Tu email">
-      <button class="btn btn-gold" type="submit">Apuntarme</button>
-    </form>
-    <div class="msg" id="wait-msg" role="status"></div>
-  </section>
 </main>
 
 <footer>
@@ -668,15 +651,6 @@ footer .demo{margin-left:auto}
     });
   });
   $('cat-select').addEventListener('change', ev => { filter = ev.target.value; renderTabs(); renderList(); });
-  $('waitform').addEventListener('submit', async ev => {
-    ev.preventDefault();
-    const v = $('wait-email').value.trim(), m = $('wait-msg');
-    try {
-      await api('/api/waitlist', { email: v });
-      m.style.color = 'var(--gold)'; m.textContent = 'Apuntado. Te avisaremos el día del lanzamiento.';
-      $('wait-email').value = '';
-    } catch (e) { m.style.color = '#ffb4b4'; m.textContent = e.message; }
-  });
 
   // ---------- ventanas ----------
   const scrim = $('scrim'), sheet = $('sheet');
