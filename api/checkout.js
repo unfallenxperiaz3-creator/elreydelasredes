@@ -37,17 +37,34 @@ export async function POST(request) {
     if (!u || u.protocol !== 'https:') return fail('El enlace debe empezar por https://');
     if (alertEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(alertEmail)) return fail('Ese email no parece válido.');
 
-    const { data: exists } = await db().from('creators').select('id').eq('platform', platform).ilike('handle', handle.replace(/[_%]/g, '\\$&')).maybeSingle();
-    if (exists) return fail('Esta cuenta ya está en el ranking. Si es tuya y la registraste en otro dispositivo, escríbenos para recuperar el acceso.', 409);
-
-    ownerToken = newToken();
-    const { data: created, error } = await db().from('creators').insert({
-      handle, platform, name, cat, url, alert_email: alertEmail || null, owner_token: ownerToken,
-      verify_code: 'REY-' + Math.floor(1000 + Math.random() * 9000)
-    }).select('id,handle').single();
-    if (error) {
-      if (error.code === '23505') return fail('Esta cuenta ya está en el ranking.', 409);
-      throw error;
+    const { data: exists } = await db().from('creators').select('id,created_at,hidden').eq('platform', platform).ilike('handle', handle.replace(/[_%]/g, '\\$&')).maybeSingle();
+    let created;
+    if (exists) {
+      // Una cuenta registrada que nunca llegó a pagar no bloquea el usuario para siempre:
+      // pasada 1 hora (lo que dura una página de pago) se puede volver a reclamar.
+      const { count } = await db().from('payments').select('id', { count: 'exact', head: true }).eq('creator_id', exists.id);
+      const age = Date.now() - new Date(exists.created_at).getTime();
+      if (count > 0 || exists.hidden) return fail('Esta cuenta ya está en el ranking. Si es tuya y la registraste en otro dispositivo, escríbenos para recuperar el acceso.', 409);
+      if (age < 65 * 60 * 1000) return fail('Alguien está registrando esta cuenta ahora mismo. Si eres tú desde otro dispositivo, termina el pago allí o vuelve a intentarlo dentro de una hora.', 409);
+      ownerToken = newToken();
+      const { error } = await db().from('creators').update({
+        handle, name, cat, url, alert_email: alertEmail || null, owner_token: ownerToken, photo_url: null,
+        verified: false, verify_requested_at: null, verify_code: 'REY-' + Math.floor(1000 + Math.random() * 9000),
+        goal_text: null, goal_target: null, created_at: new Date().toISOString()
+      }).eq('id', exists.id);
+      if (error) throw error;
+      created = { id: exists.id, handle };
+    } else {
+      ownerToken = newToken();
+      const { data, error } = await db().from('creators').insert({
+        handle, platform, name, cat, url, alert_email: alertEmail || null, owner_token: ownerToken,
+        verify_code: 'REY-' + Math.floor(1000 + Math.random() * 9000)
+      }).select('id,handle').single();
+      if (error) {
+        if (error.code === '23505') return fail('Esta cuenta ya está en el ranking.', 409);
+        throw error;
+      }
+      created = data;
     }
     creator = created;
     if (n.photo) {
@@ -83,7 +100,8 @@ export async function POST(request) {
     locale: 'es',
     custom_text: { submit: { message: 'Al pagar confirmas que tienes 18 años o más y aceptas las normas de El Rey de las Redes. Los pagos no son reembolsables.' } },
     success_url: `${origin}/?pago=ok&sid={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/?pago=cancelado`
+    cancel_url: `${origin}/?pago=cancelado`,
+    expires_at: Math.floor(Date.now() / 1000) + 60 * 60 // la página de pago caduca en 1 hora
   });
 
   return json({ url: session.url, creatorId: creator.id, ownerToken });

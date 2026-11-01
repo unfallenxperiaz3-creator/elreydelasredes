@@ -5,8 +5,10 @@ function allowed(request) {
   return !!process.env.ADMIN_PASSWORD && safeEqual(request.headers.get('x-admin-password') || '', process.env.ADMIN_PASSWORD);
 }
 
+const slow = () => new Promise(r => setTimeout(r, 1200)); // frena los intentos de adivinar la contraseña
+
 export async function GET(request) {
-  if (!allowed(request)) return fail('Contraseña incorrecta.', 401);
+  if (!allowed(request)) { await slow(); return fail('Contraseña incorrecta.', 401); }
   const since = madridDay(new Date(Date.now() - 13 * 86400000));
   const [creators, payments, waitlist, subs, visits] = await Promise.all([
     db().from('creators').select('id,name,handle,platform,url,photo_url,verified,verify_code,verify_requested_at,hidden,clicks,created_at').order('created_at', { ascending: false }).limit(500),
@@ -27,7 +29,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  if (!allowed(request)) return fail('Contraseña incorrecta.', 401);
+  if (!allowed(request)) { await slow(); return fail('Contraseña incorrecta.', 401); }
   const b = await readJson(request);
   const id = String(b?.creatorId || '');
   const upd = fields => db().from('creators').update(fields).eq('id', id);
