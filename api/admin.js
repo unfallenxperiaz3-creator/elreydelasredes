@@ -6,13 +6,15 @@ function allowed(request) {
   return !!process.env.ADMIN_PASSWORD && safeEqual(request.headers.get('x-admin-password') || '', process.env.ADMIN_PASSWORD);
 }
 
+const COLS = 'id,name,handle,platform,cat,url,photo_url,verified,verify_code,verify_requested_at,hidden,clicks,created_at';
 const slow = () => new Promise(r => setTimeout(r, 1200)); // frena los intentos de adivinar la contraseña
 
 export async function GET(request) {
   if (!allowed(request)) { await slow(); return fail('Contraseña incorrecta.', 401); }
   const since = madridDay(new Date(Date.now() - 13 * 86400000));
   const [creators, payments, waitlist, subs, visits, invites] = await Promise.all([
-    db().from('creators').select('id,name,handle,platform,url,photo_url,verified,verify_code,verify_requested_at,hidden,clicks,created_at').order('created_at', { ascending: false }).limit(500),
+    db().from('creators').select(COLS + ',invited_at,requested_at,request_followers').order('created_at', { ascending: false }).limit(500)
+      .then(r => r.error && r.error.code === '42703' ? db().from('creators').select(COLS).order('created_at', { ascending: false }).limit(500) : r),
     db().from('payments').select('id,creator_id,kind,amount_cents,nick,monthly,season,created_at').order('created_at', { ascending: false }).limit(100),
     db().from('waitlist').select('email', { count: 'exact', head: true }),
     db().from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active'),
@@ -43,6 +45,19 @@ export async function POST(request) {
     case 'hide': await upd({ hidden: true }); break;
     case 'unhide': await upd({ hidden: false }); break;
     case 'removePhoto': await upd({ photo_url: null }); break;
+    case 'acceptRequest': {
+      const { error } = await upd({ invited_at: new Date().toISOString(), invited_season: seasonKey() });
+      if (error) return fail(error.message, 500);
+      break;
+    }
+    case 'rejectRequest': {
+      // Solo se borra si sigue pendiente y no tiene pagos
+      const { count } = await db().from('payments').select('id', { count: 'exact', head: true }).eq('creator_id', id);
+      if (count) return fail('Este creador ya tiene pagos: ocúltalo en vez de borrarlo.');
+      const { error } = await db().from('creators').delete().eq('id', id).is('invited_at', null).not('requested_at', 'is', null);
+      if (error) return fail(error.message, 500);
+      break;
+    }
     case 'createInvite': {
       const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       const code = Array.from(randomBytes(10), x => ABC[x % ABC.length]).join('');

@@ -81,6 +81,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .trust svg{width:16px;height:16px;flex:none;color:var(--gold-ink)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:6px;padding:12px 18px;font-weight:600;text-decoration:none;border:1px solid transparent;transition:background .15s,border-color .15s}
 .btn-primary{background:var(--gold);color:var(--on-gold)}
+.btn-red{background:#C62828;color:#fff}
+.btn-red:hover{background:#d63434}
+.btn-red small{font-weight:500;opacity:.85}
+.fanbox{margin:18px 0 0;padding:16px 18px;border:1px dashed #5a4a22;border-radius:10px;background:var(--surface);display:grid;gap:10px}
+.fanbox b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--gold-ink)}
+.fanbox p{margin:0;color:var(--muted);font-size:15px}
+.fanbox .acts{display:flex;flex-wrap:wrap;gap:8px}
 .btn-primary:hover{background:var(--gold-ink)}
 .btn-outline{background:transparent;border-color:#3a362f;color:var(--ink)}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold-ink)}
@@ -372,6 +379,7 @@ footer .demo{margin-left:auto}
     <div class="ctas">
       <button class="btn btn-primary" id="cta-main">Soy creador: conseguir mi puesto</button>
       <a class="btn btn-outline" href="#ranking">Soy fan: apoyar a alguien</a>
+      <button class="btn btn-red" id="cta-free">Entra gratis <small>· +5.000 seguidores</small></button>
     </div>
     <ul class="trust" aria-label="Garantías">
       <li><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Pagos seguros con Stripe</li>
@@ -400,6 +408,11 @@ footer .demo{margin-left:auto}
     <ol class="list" id="list"></ol>
     <div class="legend"><span><i style="background:#5a5650"></i>Pagado por el creador</span><span><i style="background:var(--gold)"></i>Aportado por sus fans</span></div>
     <div class="feed" id="feed" aria-live="polite" hidden></div>
+    <div class="fanbox">
+      <b>¿Tu creador favorito no está?</b>
+      <p>Invítale: si tiene 5.000 seguidores o más, puede pedir su entrada gratis. Mándale este mensaje y entre todos le subís al trono.</p>
+      <div class="acts"><button class="btn btn-primary" id="fan-invite">Copiar mensaje para mi creador</button><button class="btn btn-outline" id="fan-share" hidden>Compartir</button></div>
+    </div>
   </section>
 
   <section class="duels" id="duels-sec" aria-labelledby="duels-h" hidden>
@@ -431,7 +444,7 @@ footer .demo{margin-left:auto}
     <details><summary>¿Es seguro pagar?</summary><p>Sí. Los pagos los procesa <b>Stripe</b>, una de las plataformas de pago más usadas del mundo. Nosotros nunca vemos ni guardamos los datos de tu tarjeta.</p></details>
     <details><summary>¿El dinero que aportan los fans va al creador?</summary><p>No. Lo que aportan los fans <b>suma puesto en el ranking</b> para su creador, pero no se le transfiere. Es la forma de demostrar qué comunidad es la más fuerte.</p></details>
     <details><summary>¿Qué pasa si me quitan el puesto?</summary><p>Lo que llevas no se borra nunca: sigue sumando en tu total. Puedes recuperar el puesto subiendo tu puja o con el apoyo de tus seguidores. Los pagos no son reembolsables.</p></details>
-    <details><summary>¿Puedo entrar gratis?</summary><p>Sí, con una invitación. Entras en el ranking con 0 € y la etiqueta «Invitado», y tus seguidores pueden apoyarte desde el primer día. <span id="faq-inv">Pídenos una por mensaje privado en nuestras redes.</span></p></details>
+    <details><summary>¿Puedo entrar gratis?</summary><p>Sí, si tienes <b>5.000 seguidores o más</b>. Pulsa «Entra gratis» al principio de la página y envía tu solicitud: la revisamos a mano en menos de 24 horas. Si te aceptamos, entras en el ranking con 0 € y la etiqueta «Invitado», y tus seguidores pueden apoyarte desde el primer día. <span id="faq-inv"></span></p></details>
   </section>
 
   <section class="about" aria-labelledby="about-h">
@@ -734,7 +747,7 @@ footer .demo{margin-left:auto}
   function renderAbout() {
     const mail = ST.legal && ST.legal.email;
     $('about-mail').innerHTML = mail ? `: escríbenos a <a href="mailto:${esc(mail)}">${esc(mail)}</a>` : '';
-    if (mail) $('faq-inv').innerHTML = `Pídenos una por mensaje privado en nuestras redes o escribiendo a <a href="mailto:${esc(mail)}" style="color:var(--gold-ink)">${esc(mail)}</a>.`;
+    if (mail) $('faq-inv').innerHTML = `¿Dudas? Escríbenos a <a href="mailto:${esc(mail)}" style="color:var(--gold-ink)">${esc(mail)}</a>.`;
   }
 
   function renderFounders() {
@@ -768,6 +781,14 @@ footer .demo{margin-left:auto}
     const l = ev.target.closest('[data-legal]'); if (l) openLegal(l.dataset.legal);
   });
   $('cta-main').addEventListener('click', () => openBid({}));
+  $('cta-free').addEventListener('click', () => openBid({ request: true }));
+  // Mensaje que un fan le manda a su creador para que pida su entrada gratis
+  const fanMsg = () => `¡Hola! Creo que deberías estar en El Rey de las Redes 👑 Es un ranking de creadores donde tus seguidores te suben al número 1, y cada nicho tiene su propio rey. Si tienes 5.000 seguidores o más, puedes pedir tu entrada gratis aquí: ${location.origin}/?r=fan`;
+  $('fan-invite').addEventListener('click', () => { track('fan_invita'); copyText(fanMsg(), 'Mensaje copiado: pégaselo a tu creador por privado'); });
+  if (navigator.share) {
+    $('fan-share').hidden = false;
+    $('fan-share').addEventListener('click', () => { track('fan_invita'); navigator.share({ text: fanMsg() }).catch(() => {}); });
+  }
   $('contact').addEventListener('click', () => {
     const mail = ST?.legal?.email || '';
     openSheet(`<h3 id="sheet-title">Contacto y colaboraciones</h3>
@@ -998,15 +1019,16 @@ footer .demo{margin-left:auto}
   const myAmtOf = e => e.me ? e.me.amount : 0;
 
   // ---------- puja de creador ----------
-  function openBid({ target, topUpId, invite }) {
-    track(invite ? 'abre_invitacion' : 'abre_puja');
+  function openBid({ target, topUpId, invite, request }) {
+    track(invite ? 'abre_invitacion' : request ? 'abre_solicitud' : 'abre_puja');
+    const free = !!(invite || request);
     const all = list();
     const me = topUpId ? byId(topUpId) : null;
     const form = { platform: 'tiktok', urlTouched: false, amount: MIN };
     if (target !== undefined && all[target]) form.amount = Math.max(MIN, total(all[target]) + 1);
     if (me) { const p = all.indexOf(me); form.amount = p > 0 ? Math.max(MIN, total(all[p - 1]) + 1 - total(me)) : 10; }
-    const title = invite ? 'Te han invitado: entra gratis' : me ? 'Subir tu puja' : target !== undefined ? `Quitar el puesto #${target + 1}` : 'Consigue tu puesto';
-    const lead = invite ? `Con esta invitación entras en el ranking sin pagar, con la etiqueta «Invitado». Tus seguidores podrán apoyarte desde el primer momento y, cuando quieras, puedes pujar para subir. <b style="color:var(--gold-ink)">Quedan ${invite.left} plazas en esta invitación.</b>` : me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.' + (foundersLeft() > 0 ? ` <b style="color:var(--gold-ink)">Quedan ${foundersLeft()} plazas de Fundador:</b> si entras ahora, llevarás la insignia para siempre.` : '');
+    const title = invite ? 'Te han invitado: entra gratis' : request ? 'Pide tu entrada gratis' : me ? 'Subir tu puja' : target !== undefined ? `Quitar el puesto #${target + 1}` : 'Consigue tu puesto';
+    const lead = request ? `Para creadores con <b style="color:var(--ink)">5.000 seguidores o más</b>. Revisamos cada solicitud a mano en menos de 24 horas. Si la aceptamos, entras en el ranking con la etiqueta «Invitado», tus seguidores pueden apoyarte desde el primer día y, cuando quieras, puedes pujar para subir. Te avisaremos por mensaje privado en tu red social.` : invite ? `Con esta invitación entras en el ranking sin pagar, con la etiqueta «Invitado». Tus seguidores podrán apoyarte desde el primer momento y, cuando quieras, puedes pujar para subir. <b style="color:var(--gold-ink)">Quedan ${invite.left} plazas en esta invitación.</b>` : me ? `Lo que pagues se suma a los ${eur(total(me))} que ya llevas entre tu puja y tus fans.` : 'Ponte arriba, pon tu enlace y llévate las visitas del ranking a tu perfil.' + (foundersLeft() > 0 ? ` <b style="color:var(--gold-ink)">Quedan ${foundersLeft()} plazas de Fundador:</b> si entras ahora, llevarás la insignia para siempre.` : '');
 
     openSheet(`
       <h3 id="sheet-title">${title}</h3>
@@ -1039,11 +1061,15 @@ footer .demo{margin-left:auto}
           </div>
           <div class="hint">Usa la misma imagen de perfil que tienes en tu red, para que tus seguidores te reconozcan al momento. Sale en tu fila del ranking.</div>
           <div class="err" id="er-photo"></div></div>`}
-        ${invite ? `<label class="check"><input type="checkbox" id="inv-age"> <span>Tengo 18 años o más y acepto las normas del sitio.</span></label>
+        ${request ? `<div class="field"><label for="in-fol">¿Cuántos seguidores tienes en esa red?</label>
+          <input id="in-fol" inputmode="numeric" placeholder="Por ejemplo: 12000" maxlength="12" autocomplete="off">
+          <div class="hint">Lo comprobaremos en tu perfil antes de aceptarte.</div>
+          <div class="err" id="er-fol"></div></div>` : ''}
+        ${free ? `<label class="check"><input type="checkbox" id="inv-age"> <span>Tengo 18 años o más y acepto las normas del sitio.</span></label>
           <div class="err" id="er-inv" style="font-size:13px;color:var(--alert);margin:-6px 0 12px" role="alert"></div>`
           : `${amountField(form.amount, MIN, CREATOR_MAX, `Mínimo ${MIN} €.`)}
         <div class="preview" id="preview" aria-live="polite"></div>`}
-        <button class="btn btn-primary full" type="submit">${invite ? 'Entrar gratis' : 'Continuar al pago'}</button>
+        <button class="btn ${request ? 'btn-red' : 'btn-primary'} full" type="submit">${invite ? 'Entrar gratis' : request ? 'Enviar solicitud' : 'Continuar al pago'}</button>
       </form>`);
 
     const base = me ? total(me) : 0;
@@ -1114,11 +1140,32 @@ footer .demo{margin-left:auto}
         const dup = list().find(x => x.platform === form.platform && x.handle.toLowerCase() === form.handle.toLowerCase());
         if (dup && !isMine(dup)) setErr('er-handle', 'Esta cuenta ya está en el ranking. Si es tuya y la registraste en otro dispositivo, escríbenos para recuperar el acceso.', 'in-handle');
       }
-      if (!invite) {
+      if (request) {
+        form.followers = Number.parseInt(($('in-fol').value || '').replace(/\D/g, ''), 10) || 0;
+        setErr('er-fol', form.followers >= 5000 ? '' : form.followers ? 'La entrada gratis es para creadores con 5.000 seguidores o más. Si tienes menos, puedes conseguir tu puesto desde 1 €.' : 'Escribe cuántos seguidores tienes.', 'in-fol');
+      }
+      if (!free) {
         form.amount = Math.floor(+$('in-amt').value || 0);
         setErr('er-amt', form.amount >= MIN && form.amount <= CREATOR_MAX ? '' : `Elige una cantidad entre ${MIN} y 10.000 €.`, 'in-amt');
       }
       if (first || catErr) { if (first) $(first).focus(); else sheet.querySelector('[data-cat]').focus(); return; }
+      if (request) {
+        if (!$('inv-age').checked) { $('er-inv').textContent = 'Marca la casilla para confirmar que tienes 18 años o más.'; return; }
+        const btn = sheet.querySelector('#bidform button[type=submit]'); btn.disabled = true; btn.textContent = 'Enviando…';
+        api('/api/request', { adult: true, followers: form.followers, newCreator: { handle: form.handle, platform: form.platform, name: form.name, cat: form.cat, url: form.url, photo: form.photo || '' } })
+          .then(r => {
+            owned[r.creatorId] = r.ownerToken; LS.set('rr-owned', owned);
+            LS.set('rr-req', { id: r.creatorId, handle: form.handle.replace(/^@/, '') });
+            track('envia_solicitud');
+            openSheet(`<div class="done"><h3 id="sheet-title">¡Solicitud enviada!</h3>
+              <p class="lead">Revisaremos tu perfil en menos de 24 horas. Si cumples el requisito, entrarás en el ranking y te avisaremos por mensaje privado en ${esc(netName(form.platform))}.</p>
+              <p class="lead">Mientras tanto, sigue la cuenta de El Rey de las Redes para no perderte nada.</p>
+              <button class="btn btn-outline full" id="ok-close">Entendido</button></div>`);
+            $('ok-close').addEventListener('click', closeSheet);
+          })
+          .catch(err => { $('er-inv').textContent = err.message; btn.disabled = false; btn.textContent = 'Enviar solicitud'; });
+        return;
+      }
       if (invite) {
         if (!$('inv-age').checked) { $('er-inv').textContent = 'Marca la casilla para confirmar que tienes 18 años o más.'; return; }
         const btn = sheet.querySelector('#bidform button[type=submit]'); btn.disabled = true; btn.textContent = 'Entrando…';
@@ -1396,6 +1443,14 @@ footer .demo{margin-left:auto}
         else toast('Esta invitación ya no es válida: se han usado todas sus plazas o ha caducado.', true);
       } catch (e) { toast('No se pudo comprobar la invitación. Recarga la página.', true); }
     } else openFromPath();
+    // Si este navegador pidió entrada gratis y ya está aceptada, se lo decimos
+    const req = LS.get('rr-req', null);
+    if (req && req.id && byId(req.id) && !scrim.classList.contains('open')) {
+      LS.set('rr-req', null);
+      const e = byId(req.id);
+      successSheet(e, posOf(e), 'creator', {});
+      toast('¡Tu solicitud ha sido aceptada! Ya estás en el ranking 👑');
+    }
     setInterval(() => {
       if (document.visibilityState === 'visible' && !scrim.classList.contains('open')) load().catch(() => {});
     }, 30000);

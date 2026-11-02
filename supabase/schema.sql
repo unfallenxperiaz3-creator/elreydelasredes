@@ -185,3 +185,7 @@ end $$;
 alter table creators drop constraint if exists creators_platform_check;
 alter table creators add constraint creators_platform_check
   check (platform in ('tiktok', 'instagram', 'youtube', 'twitch', 'kick'));
+
+-- ---------- Solicitudes de entrada gratis (pendientes hasta que el administrador las acepta) ----------
+alter table creators add column if not exists requested_at timestamptz;
+alter table creators add column if not exists request_followers integer;
