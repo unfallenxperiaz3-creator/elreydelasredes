@@ -355,8 +355,8 @@ footer .demo{margin-left:auto}
   </section>
 
   <section class="how" aria-label="Cómo funciona">
-    <div><h3><span>I</span>Creadores</h3><p>Consiguen su puesto desde 3 € y reciben un enlace de apoyo para su bio. Pueden marcarse metas y retar a otros creadores a un duelo.</p></div>
-    <div><h3><span>II</span>Fans</h3><p>Apoyan a su creador una vez o cada mes, con entre 3 y 20 € por pago. Quien más aporta se convierte en su fan nº1.</p></div>
+    <div><h3><span>I</span>Creadores</h3><p>Consiguen su puesto desde 1 € y reciben un enlace de apoyo para su bio. Pueden marcarse metas y retar a otros creadores a un duelo.</p></div>
+    <div><h3><span>II</span>Fans</h3><p>Apoyan a su creador una vez o cada mes, con entre 1 y 20 € por pago. Quien más aporta se convierte en su fan nº1.</p></div>
     <div><h3><span>III</span>Cada lunes</h3><p>Se cierra la temporada y quien esté en el número 1 entra en el salón de reyes. El ranking no se borra: el rey sigue arriba hasta que alguien le supere.</p></div>
   </section>
 
@@ -385,7 +385,7 @@ footer .demo{margin-left:auto}
   const CROWN = `<svg viewBox="0 0 64 52" aria-hidden="true"><path d="${CROWN_PATH}" fill="currentColor"/><rect x="4" y="42" width="56" height="7" rx="2" fill="currentColor"/></svg>`;
   const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M4.5 8.3 7 10.7l4.6-5" fill="none" stroke="#0b0b0c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const H = 3600e3, D = 24 * H;
-  const MIN = 3, FAN_MAX = 20, CREATOR_MAX = 10000;
+  const MIN = 1, FAN_MAX = 20, CREATOR_MAX = 10000;
   const CATS = {
     humor: 'Humor', musica: 'Música y baile', gaming: 'Gaming', deportes: 'Deportes y fitness',
     belleza: 'Belleza y moda', lifestyle: 'Lifestyle', viajes: 'Viajes', comida: 'Comida y cocina',
@@ -856,7 +856,7 @@ footer .demo{margin-left:auto}
         <div class="preview" id="preview" aria-live="polite"></div>
         <button class="btn btn-primary full" type="submit">Continuar al pago</button>
       </form>`);
-    const quick = [3, 5, 10, 20];
+    const quick = [1, 3, 5, 10, 20];
     if (need >= MIN && need <= FAN_MAX && !quick.includes(need)) quick.push(need);
     $('quick').innerHTML = quick.sort((a, b) => a - b).map(v => `<button type="button" data-a="${v}">${eur(v)}${v === need ? ` · sube al #${p}` : ''}</button>`).join('');
     $('quick').addEventListener('click', ev => { const b = ev.target.closest('[data-a]'); if (b) { $('in-amt').value = b.dataset.a; upd(); } });
@@ -1211,7 +1211,7 @@ footer .demo{margin-left:auto}
       rules: ['Normas', [
         'El puesto depende del total acumulado: todo lo que ha pagado el creador más todo lo que han aportado sus fans desde que entró. Ese total no se borra al cambiar de temporada. Los clics nunca ponen a nadie por encima de quien ha pagado más: solo sirven para desempatar. En caso de empate gana quien tenga más clics de personas distintas (cada persona cuenta una vez por temporada), y si siguen empatados, quien llegó antes.',
         'Cada creador elige un nicho y compite a la vez en el ranking general y en el de su nicho. Cada lunes a las 00:00 (hora de Madrid) se cierra la temporada y quien esté en el número 1 entra en el salón de reyes. El ranking no se borra: el rey sigue arriba hasta que alguien le supere.',
-        'Solo pueden pagar mayores de 18 años con su propia tarjeta. Los creadores pagan desde 3 €. Los fans aportan entre 3 y 20 € por pago, una vez o cada mes. El apoyo mensual se puede cancelar en cualquier momento desde la comunidad del creador. Los pagos no son reembolsables.',
+        'Solo pueden pagar mayores de 18 años con su propia tarjeta. Los creadores pagan desde 1 €. Los fans aportan entre 1 y 20 € por pago, una vez o cada mes. El apoyo mensual se puede cancelar en cualquier momento desde la comunidad del creador. Los pagos no son reembolsables.',
         'Los duelos duran 24 horas y los acepta el creador retado. Gana la comunidad que más aporte durante el duelo. El premio es visibilidad y el logro, nunca dinero.',
         'Las metas las fija cada creador y él es responsable de cumplirlas.',
         'Para el sello de verificado hay que poner en la bio el código que te damos. Las fotos deben ser tuyas: retiramos sin reembolso las de otras personas o con contenido inapropiado.',
