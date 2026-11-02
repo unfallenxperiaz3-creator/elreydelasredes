@@ -308,7 +308,7 @@ footer .demo{margin-left:auto}
   <section class="hero">
     <h1>Paga. Sube.<br><span>Reina.</span></h1>
     <p class="claim">Sé el rey o la reina de las redes y haz que tus seguidores <em>te mantengan en lo más alto</em></p>
-    <p>El ranking de creadores de TikTok, Instagram, YouTube, Twitch y Kick donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio o en tu canal y deja que tus seguidores te suban. Gana la comunidad más fuerte de la semana.</p>
+    <p>El ranking de creadores de TikTok, Instagram, YouTube, Twitch y Kick donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio o en tu canal y deja que tus seguidores te suban. El número 1 reina hasta que alguien le destrone.</p>
     <div class="fbar" id="fbar" hidden></div>
     <div class="ctas">
       <button class="btn btn-primary" id="cta-main">Soy creador: conseguir mi puesto</button>
@@ -326,7 +326,7 @@ footer .demo{margin-left:auto}
 
   <section id="ranking">
     <div class="sect-h">
-      <div><h2>Ranking</h2><p>Total de la temporada: puja del creador más apoyo de sus fans.</p></div>
+      <div><h2>Ranking</h2><p>Total acumulado: lo que ha pagado el creador más el apoyo de sus fans. No se borra al cambiar de temporada.</p></div>
       <div class="filters">
         <div class="tabs" role="group" aria-label="Nichos con creadores" id="tabs"></div>
         <label for="cat-select" style="position:absolute;left:-9999px">Todos los nichos</label>
@@ -350,14 +350,14 @@ footer .demo{margin-left:auto}
   </section>
 
   <section class="hall" aria-labelledby="hall-h">
-    <div class="sect-h"><div><h2 id="hall-h">Salón de reyes</h2><p>Quienes cerraron la semana en el número 1.</p></div></div>
+    <div class="sect-h"><div><h2 id="hall-h">Salón de reyes</h2><p>Quién reinaba al cerrar cada temporada.</p></div></div>
     <ol id="hall"></ol>
   </section>
 
   <section class="how" aria-label="Cómo funciona">
     <div><h3><span>I</span>Creadores</h3><p>Consiguen su puesto desde 3 € y reciben un enlace de apoyo para su bio. Pueden marcarse metas y retar a otros creadores a un duelo.</p></div>
     <div><h3><span>II</span>Fans</h3><p>Apoyan a su creador una vez o cada mes, con entre 3 y 20 € por pago. Quien más aporta se convierte en su fan nº1.</p></div>
-    <div><h3><span>III</span>Cada lunes</h3><p>Se cierra la temporada. El número 1 entra en el salón de reyes, suma logros y el ranking empieza de cero.</p></div>
+    <div><h3><span>III</span>Cada lunes</h3><p>Se cierra la temporada y quien esté en el número 1 entra en el salón de reyes. El ranking no se borra: el rey sigue arriba hasta que alguien le supere.</p></div>
   </section>
 
 </main>
@@ -520,7 +520,7 @@ footer .demo{margin-left:auto}
       Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${filter === k ? 'selected' : ''}>${v}${count[k] ? ` · ${count[k]}` : ''}</option>`).join('');
   }
 
-  const hasKing = () => !!list()[0] && total(list()[0]) > 0;
+  const hasKing = () => !!list()[0]; // el número 1 siempre ocupa el trono, aunque haya entrado gratis
   function renderThrone(anim) {
     const k = hasKing() ? list()[0] : null;
     if (!k) {
@@ -559,7 +559,7 @@ footer .demo{margin-left:auto}
         <button class="btn btn-outline" data-creator="${k.id}">Ver comunidad</button>
         <a class="btn btn-outline" href="${esc(k.url)}" target="_blank" rel="noopener nofollow ugc" data-click="${k.id}">Visitar perfil</a>
         ${mine ? `<button class="btn btn-outline" data-topup="${k.id}">Reforzar puja</button><button class="btn btn-outline" data-copylink="${k.id}">Copiar mi enlace de apoyo</button>`
-               : `<button class="btn btn-primary" data-steal="0">Destronar por ${eur(t + 1)}</button>`}
+               : `<button class="btn btn-primary" data-steal="0">Destronar por ${eur(Math.max(MIN, t + 1))}</button>`}
       </div>`;
     if (anim) { const el = $('throne'); el.classList.remove('crowned'); void el.offsetWidth; el.classList.add('crowned'); }
   }
@@ -587,7 +587,7 @@ footer .demo{margin-left:auto}
           <button class="sbtn pri" data-support="${e.id}">Apoyar</button>
           <button class="sbtn" data-creator="${e.id}">Comunidad</button>
           ${mine ? `<button class="sbtn" data-topup="${e.id}">Subir mi puja</button><button class="sbtn" data-copylink="${e.id}">Copiar mi enlace</button>${e.verified || e.verifyRequested ? '' : `<button class="sbtn" data-verify="${e.id}">Verificar</button>`}`
-                 : (i === 0 && hasKing()) ? '' : `<button class="sbtn link" data-steal="${i}" aria-label="Quitarle el puesto ${i + 1} a ${esc(e.name)} por ${eur(t + 1)}">Soy creador: quitar puesto · ${eur(t + 1)}</button>`}
+                 : (i === 0 && hasKing()) ? '' : `<button class="sbtn link" data-steal="${i}" aria-label="Quitarle el puesto ${i + 1} a ${esc(e.name)} por ${eur(Math.max(MIN, t + 1))}">Soy creador: quitar puesto · ${eur(Math.max(MIN, t + 1))}</button>`}
         </div>
       </li>`;
     }).join('') || `<li class="row" style="display:block;color:var(--muted);padding:18px">${niche ? 'Nadie en este nicho todavía. El primero que entre será su rey.' : all.length ? 'Solo hay un creador en el ranking. Entra ahora y ponte justo detrás del rey.' : 'El ranking está vacío. Consigue tu puesto y estrena la temporada.'}</li>`;
@@ -616,7 +616,7 @@ footer .demo{margin-left:auto}
     const all = list();
     const com = [...all].sort((a, b) => b.supporters - a.supporters)[0];
     $('s-com').textContent = com && com.supporters ? int(com.supporters) + ' fans' : '–';
-    $('s-com-who').textContent = com && com.supporters ? '@' + com.handle + ' · ' + eur(com.fans) + ' aportados' : 'Aún sin apoyos esta temporada';
+    $('s-com-who').textContent = com && com.supporters ? '@' + com.handle + ' · ' + eur(com.fans) + ' aportados' : 'Aún sin apoyos';
     const L = ST.stats.longest;
     $('s-reign').textContent = L ? dur(L.ms) : '–';
     $('s-reign-who').textContent = L ? '@' + L.handle + (L.live ? ' · sigue reinando' : '') : 'Aún no ha reinado nadie';
@@ -627,7 +627,7 @@ footer .demo{margin-left:auto}
     $('t-clicks').textContent = int(ST.stats.clicks);
     $('feed').innerHTML = (ST.feed || []).slice(0, 3).map(f => f.kind === 'fan'
       ? `<div><b>${esc(f.nick)}</b> ${f.monthly ? 'renovó su apoyo mensual a' : 'apoyó a'} @${esc(f.handle)} con ${eur(f.amount)} · ${ago(f.at)}</div>`
-      : `<div><b>@${esc(f.handle)}</b> pujó ${eur(f.amount)} por su puesto · ${ago(f.at)}</div>`).join('') || '<div>Aquí verás la actividad en directo de la temporada.</div>';
+      : `<div><b>@${esc(f.handle)}</b> pujó ${eur(f.amount)} por su puesto · ${ago(f.at)}</div>`).join('') || '<div>Aquí verás la actividad en directo.</div>';
   }
 
   function renderHall() {
@@ -773,7 +773,7 @@ footer .demo{margin-left:auto}
       ${d ? `<div class="cs-sec"><h4>En duelo</h4>${duelHTML(d)}</div>` : ''}
 
       <div class="cs-sec"><h4>Logros</h4>
-        ${ach.length ? `<div class="badges">${ach.map(a => `<span class="badge">${esc(a)}</span>`).join('')}</div>` : '<p class="small">Aún sin logros esta temporada.</p>'}
+        ${ach.length ? `<div class="badges">${ach.map(a => `<span class="badge">${esc(a)}</span>`).join('')}</div>` : '<p class="small">Aún sin logros.</p>'}
       </div>
 
       <div class="cs-sec"><h4>Sus fans que más aportan</h4>
@@ -867,7 +867,7 @@ footer .demo{margin-left:auto}
     }));
     function upd() {
       $('amt-suf').textContent = mode === 'month' ? '€/mes' : '€';
-      $('mode-hint').textContent = mode === 'month' ? 'Se cobra hoy y cada mes, y suma a la temporada en curso. Cancela cuando quieras desde su comunidad.' : 'Un solo pago para esta temporada.';
+      $('mode-hint').textContent = mode === 'month' ? 'Se cobra hoy y cada mes, y cada pago se suma a su total. Cancela cuando quieras desde su comunidad.' : 'Un solo pago que se suma a su total y no se borra.';
       const a = Math.floor(+$('in-amt').value || 0);
       const np = positionFor(total(e) + a, e.id);
       const top = (e.topFans || [])[0];
@@ -1209,8 +1209,8 @@ footer .demo{margin-left:auto}
     const L = ST?.legal || {}, owner = L.name || '[nombre del titular]', nif = L.nif || '[NIF]', mail = L.email || '[email de contacto]';
     return {
       rules: ['Normas', [
-        'El puesto depende del total de la temporada: lo que paga el creador más lo que aportan sus fans. Los clics nunca ponen a nadie por encima de quien ha pagado más: solo sirven para desempatar. En caso de empate gana quien tenga más clics de personas distintas esta temporada (cada persona cuenta una vez), y si siguen empatados, quien llegó antes.',
-        'Cada creador elige un nicho y compite a la vez en el ranking general y en el de su nicho. Cada lunes a las 00:00 (hora de Madrid) se cierra la temporada, el número 1 entra en el salón de reyes y el ranking empieza de cero.',
+        'El puesto depende del total acumulado: todo lo que ha pagado el creador más todo lo que han aportado sus fans desde que entró. Ese total no se borra al cambiar de temporada. Los clics nunca ponen a nadie por encima de quien ha pagado más: solo sirven para desempatar. En caso de empate gana quien tenga más clics de personas distintas (cada persona cuenta una vez por temporada), y si siguen empatados, quien llegó antes.',
+        'Cada creador elige un nicho y compite a la vez en el ranking general y en el de su nicho. Cada lunes a las 00:00 (hora de Madrid) se cierra la temporada y quien esté en el número 1 entra en el salón de reyes. El ranking no se borra: el rey sigue arriba hasta que alguien le supere.',
         'Solo pueden pagar mayores de 18 años con su propia tarjeta. Los creadores pagan desde 3 €. Los fans aportan entre 3 y 20 € por pago, una vez o cada mes. El apoyo mensual se puede cancelar en cualquier momento desde la comunidad del creador. Los pagos no son reembolsables.',
         'Los duelos duran 24 horas y los acepta el creador retado. Gana la comunidad que más aporte durante el duelo. El premio es visibilidad y el logro, nunca dinero.',
         'Las metas las fija cada creador y él es responsable de cumplirlas.',
@@ -1254,7 +1254,7 @@ footer .demo{margin-left:auto}
     const m = location.pathname.match(/^\/@([A-Za-z0-9._-]{2,30})\/?$/);
     if (!m) return;
     const e = list().find(x => x.handle.toLowerCase() === m[1].toLowerCase());
-    if (e) openSupport(e.id, false); else toast(`@${m[1]} no está en el ranking esta temporada`);
+    if (e) openSupport(e.id, false); else toast(`@${m[1]} no está en el ranking`);
   }
 
   // ---------- contador de visitas (anónimo, sin cookies) ----------

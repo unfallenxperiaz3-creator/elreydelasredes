@@ -1,9 +1,8 @@
-// Se ejecuta cada día (Vercel Cron). Si la temporada anterior ya terminó y su rey
-// aún no está en el salón de reyes, lo guarda. El ranking nuevo empieza solo,
-// porque cada pago se apunta en la semana en que se hizo.
+// Se ejecuta cada día. Si la temporada anterior ya terminó y su rey aún no está en el
+// salón de reyes, lo guarda. El ranking es acumulado: no se borra al cambiar de temporada.
 import { db, json, fail, board, previousSeasonKey, safeEqual } from '../lib/core.js';
 
-// Guarda en el salón de reyes al número 1 de la temporada anterior (si aún no está).
+// Guarda en el salón de reyes a quien estaba en el número 1 al cerrar la temporada anterior (si aún no está).
 export async function closeSeason() {
   const season = previousSeasonKey();
   const { data: done } = await db().from('hall').select('season').eq('season', season).maybeSingle();

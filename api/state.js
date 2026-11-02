@@ -21,7 +21,7 @@ export async function GET(request) {
     const season = seasonKey();
     const now = Date.now();
     const [{ creators, payments, ranked }, duelsRes, winsRes, hallRes, kings, bigRes, firstRes, subsRes] = await Promise.all([
-      board(season),
+      board(),
       db().from('duels').select('*').gte('created_at', new Date(now - 8 * DAY).toISOString()).order('created_at'),
       db().from('duels').select('winner').eq('status', 'done').not('winner', 'is', null),
       db().from('hall').select('season,creator_id,name,handle,total_cents,fans').order('season', { ascending: false }),
@@ -61,18 +61,16 @@ export async function GET(request) {
     const duelWins = {};
     for (const w of winsRes.data) duelWins[w.winner] = (duelWins[w.winner] || 0) + 1;
 
-    // Reinados: el más largo de todas las temporadas y desde cuándo reina el actual
+    // Reinados: el ranking es acumulado, así que un reinado sigue hasta que otro creador pasa al número 1
     let longest = null, kingSince = null;
     for (let i = 0; i < kings.length; i++) {
       const k = kings[i], next = kings[i + 1];
-      const end = next && next.season === k.season ? new Date(next.since).getTime()
-        : k.season === season ? now : new Date(seasonEndsAt(new Date(k.since))).getTime();
+      const end = next ? new Date(next.since).getTime() : now;
       const ms = end - new Date(k.since).getTime();
       if (visible(k.creator_id) && (!longest || ms > longest.ms)) longest = { creatorId: k.creator_id, ms };
-      if (k.season === season && !next) kingSince = k.since;
     }
-    const lastKing = [...kings].reverse().find(k => k.season === season);
-    if (!ranked[0] || !lastKing || lastKing.creator_id !== ranked[0].id) kingSince = ranked[0]?.firstPaid || null;
+    const lastKing = kings[kings.length - 1];
+    kingSince = ranked[0] && lastKing && lastKing.creator_id === ranked[0].id ? lastKing.since : ranked[0]?.firstPaid || null;
 
     const today = madridDay();
     const todayCents = payments.filter(p => visible(p.creator_id) && madridDay(new Date(p.created_at)) === today).reduce((s, p) => s + p.amount_cents, 0);
