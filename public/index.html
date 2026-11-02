@@ -56,6 +56,26 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .hero p.claim em{font-style:normal;color:var(--gold-ink);border-bottom:2px solid var(--gold)}
 .hero p{margin:0;max-width:56ch;color:var(--muted);font-size:17px}
 .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+[hidden]{display:none!important}
+/* logo animado junto al titular */
+.hero-top{position:relative}
+.hero-logo{position:absolute;right:0;bottom:2px;width:clamp(84px,22vw,240px);pointer-events:none;filter:drop-shadow(0 0 26px rgba(201,162,74,.35))}
+.hero-logo svg{display:block;width:100%;height:auto;overflow:visible}
+.hl-float{animation:hlFloat 6s ease-in-out 2.2s infinite;transform-box:fill-box;transform-origin:center}
+.hl-draw{stroke-dasharray:210;stroke-dashoffset:210;fill-opacity:0;animation:hlDraw 1.6s ease .2s forwards,hlFill .9s ease 1.3s forwards}
+.hl-base{opacity:0;animation:hlFill .6s ease 1.5s forwards}
+.hl-shine{animation:hlShine 4.5s ease-in-out 2.4s infinite}
+.hl-spark{opacity:0;transform-box:fill-box;transform-origin:center;animation:hlSpark 3.2s ease-in-out infinite}
+@keyframes hlDraw{to{stroke-dashoffset:0}}
+@keyframes hlFill{to{fill-opacity:1;opacity:1}}
+@keyframes hlShine{0%{transform:translateX(0)}40%,100%{transform:translateX(120px)}}
+@keyframes hlFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes hlSpark{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.hl-draw{stroke-dashoffset:0;fill-opacity:1}.hl-base{opacity:1}}
+/* franja de confianza */
+.trust{display:flex;flex-wrap:wrap;gap:8px 20px;margin:2px 0 0;padding:0;list-style:none;font-size:13.5px;color:var(--muted)}
+.trust li{display:flex;align-items:center;gap:7px}
+.trust svg{width:16px;height:16px;flex:none;color:var(--gold-ink)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:6px;padding:12px 18px;font-weight:600;text-decoration:none;border:1px solid transparent;transition:background .15s,border-color .15s}
 .btn-primary{background:var(--gold);color:var(--on-gold)}
 .btn-primary:hover{background:var(--gold-ink)}
@@ -202,6 +222,23 @@ img.avatar{object-fit:cover}
 @media (max-width:620px){.how{grid-template-columns:1fr;gap:18px}}
 
 
+/* preguntas frecuentes y quién está detrás */
+.faq{margin:0 0 44px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+.faq summary{cursor:pointer;list-style:none;padding:15px 44px 15px 16px;font-weight:600;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--gold-ink);font-size:22px;font-weight:400}
+.faq details[open] summary::after{content:'–'}
+.faq details p{margin:0;padding:0 16px 16px;color:var(--muted);font-size:15px}
+.faq details p b{color:var(--ink)}
+.about{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:start;margin:0 0 44px;padding:22px;border:1px solid #5a4a22;border-radius:10px;background:linear-gradient(135deg,#1d180c,#121110)}
+.about .ab-ico{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold-ink)}
+.about .ab-ico svg{width:26px}
+.about h2{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:28px;color:var(--gold-ink)}
+.about p{margin:0 0 8px;color:var(--muted);font-size:15px}
+.about a{color:var(--gold-ink)}
+@media (max-width:620px){.about{grid-template-columns:1fr}}
+
 footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:13px;background:#08080a}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
 footer button{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
@@ -298,15 +335,34 @@ footer .demo{margin-left:auto}
       <span class="lname"><span>El Rey de</span><span>las Redes</span></span>
     </a>
     <div class="ticker num">
-      <span>Hoy <b id="t-today">0 €</b></span>
-      <span class="hide-s"><b id="t-clicks">0</b> clics enviados</span>
+      <span id="tk-today" hidden>Hoy <b id="t-today">0 €</b></span>
+      <span class="hide-s" id="tk-clicks" hidden><b id="t-clicks">0</b> clics enviados</span>
     </div>
   </div>
 </header>
 
 <main class="wrap" id="top">
   <section class="hero">
-    <h1>Paga. Sube.<br><span>Reina.</span></h1>
+    <div class="hero-top">
+      <h1>Paga. Sube.<br><span>Reina.</span></h1>
+      <div class="hero-logo" aria-hidden="true">
+        <svg viewBox="-6 -8 76 66">
+          <defs>
+            <linearGradient id="hl-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1d58a"/><stop offset=".55" stop-color="#dcbc68"/><stop offset="1" stop-color="#a8832f"/></linearGradient>
+            <linearGradient id="hl-glint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+            <clipPath id="hl-clip"><path d="M4 38 8 10l14 15L32 4l10 21 14-15 4 28Z"/><rect x="4" y="42" width="56" height="7" rx="2"/></clipPath>
+          </defs>
+          <g class="hl-float">
+            <path class="hl-draw" d="M4 38 8 10l14 15L32 4l10 21 14-15 4 28Z" fill="url(#hl-gold)" stroke="#dcbc68" stroke-width="1.2" stroke-linejoin="round"/>
+            <rect class="hl-base" x="4" y="42" width="56" height="7" rx="2" fill="url(#hl-gold)"/>
+            <g clip-path="url(#hl-clip)"><rect class="hl-shine" x="-40" y="-6" width="16" height="64" fill="url(#hl-glint)" transform="skewX(-20)"/></g>
+          </g>
+          <path class="hl-spark" d="M0 -6 1.4 -1.4 6 0 1.4 1.4 0 6 -1.4 1.4 -6 0 -1.4 -1.4Z" transform="translate(-1 6)" fill="#f1d58a" style="animation-delay:2.4s"/>
+          <path class="hl-spark" d="M0 -6 1.4 -1.4 6 0 1.4 1.4 0 6 -1.4 1.4 -6 0 -1.4 -1.4Z" transform="translate(66 2) scale(.8)" fill="#f1d58a" style="animation-delay:3.5s"/>
+          <path class="hl-spark" d="M0 -6 1.4 -1.4 6 0 1.4 1.4 0 6 -1.4 1.4 -6 0 -1.4 -1.4Z" transform="translate(32 -5) scale(.6)" fill="#f1d58a" style="animation-delay:4.4s"/>
+        </svg>
+      </div>
+    </div>
     <p class="claim">Sé el rey o la reina de las redes y haz que tus seguidores <em>te mantengan en lo más alto</em></p>
     <p>El ranking de creadores de TikTok, Instagram, YouTube, Twitch y Kick donde el puesto se compra. Consigue tu puesto, pon tu enlace de apoyo en tu bio o en tu canal y deja que tus seguidores te suban. El número 1 reina hasta que alguien le destrone.</p>
     <div class="fbar" id="fbar" hidden></div>
@@ -314,6 +370,11 @@ footer .demo{margin-left:auto}
       <button class="btn btn-primary" id="cta-main">Soy creador: conseguir mi puesto</button>
       <a class="btn btn-outline" href="#ranking">Soy fan: apoyar a alguien</a>
     </div>
+    <ul class="trust" aria-label="Garantías">
+      <li><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Pagos seguros con Stripe</li>
+      <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Sin registro ni contraseñas</li>
+      <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5s-4.5-4.6-4.5-8a4.5 4.5 0 0 1 9 0c0 3.4-4.5 8-4.5 8Z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="6.5" r="1.6" fill="currentColor"/></svg>Proyecto independiente hecho en España</li>
+    </ul>
   </section>
 
   <section class="throne" id="throne" aria-label="Puesto número 1"><p style="margin:0;color:var(--muted)">Cargando el ranking…</p></section>
@@ -335,21 +396,21 @@ footer .demo{margin-left:auto}
     </div>
     <ol class="list" id="list"></ol>
     <div class="legend"><span><i style="background:#5a5650"></i>Pagado por el creador</span><span><i style="background:var(--gold)"></i>Aportado por sus fans</span></div>
-    <div class="feed" id="feed" aria-live="polite"></div>
+    <div class="feed" id="feed" aria-live="polite" hidden></div>
   </section>
 
-  <section class="duels" aria-labelledby="duels-h">
+  <section class="duels" id="duels-sec" aria-labelledby="duels-h" hidden>
     <div class="sect-h"><div><h2 id="duels-h">Duelos</h2><p>Dos creadores, 24 horas. Gana la comunidad que más aporte y se lleva el protagonismo.</p></div></div>
     <div id="duels"></div>
   </section>
 
-  <section class="cards" aria-label="Récords">
-    <div class="card"><small>Comunidad más fuerte</small><strong class="num" id="s-com">–</strong><span id="s-com-who"></span></div>
-    <div class="card"><small>Reinado más largo</small><strong class="num" id="s-reign">–</strong><span id="s-reign-who"></span></div>
-    <div class="card"><small>Pago más alto</small><strong class="num" id="s-bid">–</strong><span id="s-bid-who"></span></div>
+  <section class="cards" id="records" aria-label="Récords" hidden>
+    <div class="card" id="c-com"><small>Comunidad más fuerte</small><strong class="num" id="s-com">–</strong><span id="s-com-who"></span></div>
+    <div class="card" id="c-reign"><small>Reinado más largo</small><strong class="num" id="s-reign">–</strong><span id="s-reign-who"></span></div>
+    <div class="card" id="c-bid"><small>Pago más alto</small><strong class="num" id="s-bid">–</strong><span id="s-bid-who"></span></div>
   </section>
 
-  <section class="hall" aria-labelledby="hall-h">
+  <section class="hall" id="hall-sec" aria-labelledby="hall-h" hidden>
     <div class="sect-h"><div><h2 id="hall-h">Salón de reyes</h2><p>Quién reinaba al cerrar cada temporada.</p></div></div>
     <ol id="hall"></ol>
   </section>
@@ -358,6 +419,25 @@ footer .demo{margin-left:auto}
     <div><h3><span>I</span>Creadores</h3><p>Consiguen su puesto desde 1 € y reciben un enlace de apoyo para su bio. Pueden marcarse metas y retar a otros creadores a un duelo.</p></div>
     <div><h3><span>II</span>Fans</h3><p>Apoyan a su creador una vez o cada mes, con entre 1 y 20 € por pago. Quien más aporta se convierte en su fan nº1.</p></div>
     <div><h3><span>III</span>Cada lunes</h3><p>Se cierra la temporada y quien esté en el número 1 entra en el salón de reyes. El ranking no se borra: el rey sigue arriba hasta que alguien le supere.</p></div>
+  </section>
+
+  <section class="faq" aria-labelledby="faq-h">
+    <div class="sect-h"><div><h2 id="faq-h">Preguntas frecuentes</h2></div></div>
+    <details><summary>¿Qué gano como creador?</summary><p>Un puesto en el ranking general y en el de tu nicho, donde es más fácil destacar. Cada fila lleva a tu perfil, así que te descubre gente nueva. Además recibes un <b>enlace personal para tu bio</b>: ahí tus seguidores ven tu puesto, tus fans que más aportan y tu meta, y pueden apoyarte para subirte.</p></details>
+    <details><summary>¿Tengo que registrarme?</summary><p>No. Eliges tu red, tu usuario y tu nicho, y listo. No hay cuentas ni contraseñas: tu acceso de creador se guarda en tu navegador. Si cambias de móvil, puedes recuperarlo desde «Recuperar acceso de creador», al final de la página.</p></details>
+    <details><summary>¿Es seguro pagar?</summary><p>Sí. Los pagos los procesa <b>Stripe</b>, una de las plataformas de pago más usadas del mundo. Nosotros nunca vemos ni guardamos los datos de tu tarjeta.</p></details>
+    <details><summary>¿El dinero que aportan los fans va al creador?</summary><p>No. Lo que aportan los fans <b>suma puesto en el ranking</b> para su creador, pero no se le transfiere. Es la forma de demostrar qué comunidad es la más fuerte.</p></details>
+    <details><summary>¿Qué pasa si me quitan el puesto?</summary><p>Lo que llevas no se borra nunca: sigue sumando en tu total. Puedes recuperar el puesto subiendo tu puja o con el apoyo de tus seguidores. Los pagos no son reembolsables.</p></details>
+    <details><summary>¿Puedo entrar gratis?</summary><p>Sí, con una invitación. Entras en el ranking con 0 € y la etiqueta «Invitado», y tus seguidores pueden apoyarte desde el primer día. <span id="faq-inv">Pídenos una por mensaje privado en nuestras redes.</span></p></details>
+  </section>
+
+  <section class="about" aria-labelledby="about-h">
+    <span class="ab-ico" aria-hidden="true"><svg viewBox="0 0 64 52"><path d="M4 38 8 10l14 15L32 4l10 21 14-15 4 28Z" fill="currentColor"/><rect x="4" y="42" width="56" height="7" rx="2" fill="currentColor"/></svg></span>
+    <div>
+      <h2 id="about-h">¿Quién está detrás?</h2>
+      <p>Soy Omar, y he creado El Rey de las Redes para que los creadores, sobre todo los que empiezan, tengan un sitio donde destacar en su nicho, y para que sus seguidores puedan demostrar qué comunidad es la más fiel.</p>
+      <p>Es un proyecto independiente hecho en España. Leo y contesto personalmente cada mensaje<span id="about-mail"></span>.</p>
+    </div>
   </section>
 
 </main>
@@ -608,8 +688,9 @@ footer .demo{margin-left:auto}
   function renderDuels() {
     const ds = (ST.duels || []).filter(d => d.status !== 'pending' && byId(d.a) && byId(d.b))
       .sort((a, b) => (a.status === 'done') - (b.status === 'done') || new Date(a.endsAt) - new Date(b.endsAt)).slice(0, 4);
-    $('duels').innerHTML = ds.length ? `<div class="dgrid">${ds.map(duelHTML).join('')}</div>`
-      : '<div class="dempty">No hay duelos ahora mismo. Si tienes puesto, reta a otro creador desde tu comunidad.</div>';
+    // Solo se enseña el apartado cuando hay algún duelo: así la web no parece vacía
+    $('duels-sec').hidden = !ds.length;
+    $('duels').innerHTML = ds.length ? `<div class="dgrid">${ds.map(duelHTML).join('')}</div>` : '';
   }
 
   function renderStats() {
@@ -623,11 +704,20 @@ footer .demo{margin-left:auto}
     const B = ST.stats.biggest;
     $('s-bid').textContent = B ? eur(B.amount) : '–';
     $('s-bid-who').textContent = B ? '@' + B.handle + ' en un solo pago' : 'Aún no hay pagos';
+    // Las tarjetas, el contador y la actividad solo aparecen cuando tienen datos
+    $('c-com').hidden = !(com && com.supporters);
+    $('c-reign').hidden = !L;
+    $('c-bid').hidden = !B;
+    $('records').hidden = $('c-com').hidden && $('c-reign').hidden && $('c-bid').hidden;
     $('t-today').textContent = eur(ST.stats.today);
+    $('tk-today').hidden = !(ST.stats.today > 0);
     $('t-clicks').textContent = int(ST.stats.clicks);
-    $('feed').innerHTML = (ST.feed || []).slice(0, 3).map(f => f.kind === 'fan'
+    $('tk-clicks').hidden = !(ST.stats.clicks > 0);
+    const feed = (ST.feed || []).slice(0, 3);
+    $('feed').hidden = !feed.length;
+    $('feed').innerHTML = feed.map(f => f.kind === 'fan'
       ? `<div><b>${esc(f.nick)}</b> ${f.monthly ? 'renovó su apoyo mensual a' : 'apoyó a'} @${esc(f.handle)} con ${eur(f.amount)} · ${ago(f.at)}</div>`
-      : `<div><b>@${esc(f.handle)}</b> pujó ${eur(f.amount)} por su puesto · ${ago(f.at)}</div>`).join('') || '<div>Aquí verás la actividad en directo.</div>';
+      : `<div><b>@${esc(f.handle)}</b> pujó ${eur(f.amount)} por su puesto · ${ago(f.at)}</div>`).join('');
   }
 
   function renderHall() {
@@ -635,7 +725,14 @@ footer .demo{margin-left:auto}
       <span class="s">Temporada ${h.n}</span>
       <span class="n">${esc(h.name)}</span>
       <span class="m num">${eur(h.total)} · ${int(h.fans)} fans</span>
-    </li>`).join('') || '<li><span class="s">Temporada ' + ST.season.n + '</span><span class="n">Por decidir</span><span class="m">Se cierra el lunes a las 00:00</span></li>';
+    </li>`).join('');
+    $('hall-sec').hidden = !(ST.hall || []).length;
+  }
+
+  function renderAbout() {
+    const mail = ST.legal && ST.legal.email;
+    $('about-mail').innerHTML = mail ? `: escríbeme a <a href="mailto:${esc(mail)}">${esc(mail)}</a>` : '';
+    if (mail) $('faq-inv').innerHTML = `Pídenos una por mensaje privado en nuestras redes o escribiendo a <a href="mailto:${esc(mail)}" style="color:var(--gold-ink)">${esc(mail)}</a>.`;
   }
 
   function renderFounders() {
@@ -647,7 +744,7 @@ footer .demo{margin-left:auto}
       ? `<span class="seats" aria-hidden="true">${Array.from({ length: f.total }, (_, i) => `<i class="${i < f.taken ? 'off' : ''}"></i>`).join('')}</span><span><b>Quedan ${left} de ${f.total} plazas de Fundador.</b> Los ${f.total} primeros creadores llevarán para siempre la insignia de Fundador en el ranking.</span>`
       : `<span><b>Las ${f.total} plazas de Fundador ya tienen dueño.</b> Búscalos en el ranking con su insignia dorada.</span>`;
   }
-  function render(anim) { renderFounders(); renderTabs(); renderThrone(anim); renderList(); renderDuels(); renderStats(); renderHall(); }
+  function render(anim) { renderFounders(); renderTabs(); renderThrone(anim); renderList(); renderDuels(); renderStats(); renderHall(); renderAbout(); }
 
   // ---------- eventos ----------
   document.addEventListener('click', ev => {
@@ -658,6 +755,7 @@ footer .demo{margin-left:auto}
     }
     const nb = ev.target.closest('[data-newbid]'); if (nb) return openBid({});
     const vf = ev.target.closest('[data-verify]'); if (vf) { const e = byId(vf.dataset.verify); if (e) openVerify(e); return; }
+    const si = ev.target.closest('[data-shareimg]'); if (si) { const e = byId(si.dataset.shareimg); if (e) successSheet(e, posOf(e), 'creator', {}); return; }
     const cl = ev.target.closest('[data-copylink]'); if (cl) { const e = byId(cl.dataset.copylink); if (e) copyText(supportLink(e), 'Enlace copiado: pégalo en tu bio'); return; }
     const sp = ev.target.closest('[data-support]'); if (sp) return openSupport(sp.dataset.support, false);
     const mo = ev.target.closest('[data-monthly]'); if (mo) return openSupport(mo.dataset.monthly, true);
@@ -789,6 +887,7 @@ footer .demo{margin-left:auto}
         <div class="acts" style="margin-bottom:10px">
           <label class="btn btn-outline" for="cs-photo" style="cursor:pointer">Cambiar foto o icono</label><input id="cs-photo" type="file" accept="image/*" style="position:absolute;left:-9999px">
           <button class="btn btn-outline" data-copylink="${e.id}">Copiar mi enlace de apoyo</button>
+          <button class="btn btn-outline" data-shareimg="${e.id}">Imagen para mis historias</button>
           ${e.verified ? '' : `<button class="btn btn-outline" data-verify="${e.id}">${e.verifyRequested ? 'Verificación pendiente' : 'Verificar mi cuenta'}</button>`}
         </div>
         <div class="err" id="er-acc" style="font-size:12px;color:var(--alert);margin-top:6px"></div>
