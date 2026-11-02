@@ -614,10 +614,9 @@ footer .demo{margin-left:auto}
       return;
     }
     const t = total(k), fan1 = (k.topFans || [])[0], mine = isMine(k);
-    const since = ST.stats.kingSince;
     $('throne').innerHTML = `
       <span class="th-water">${CROWN}</span>
-      <div class="th-top"><b>En el trono${mine ? ' · eres tú' : ''}</b>${since ? `<span>Reinando desde hace ${dur(now() - new Date(since).getTime())}</span>` : ''}</div>
+      <div class="th-top"><b>En el trono${mine ? ' · eres tú' : ''}</b></div>
       <div class="th-main">
         <span class="th-n">1</span>
         ${avatar(k)}
