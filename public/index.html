@@ -435,9 +435,9 @@ footer .demo{margin-left:auto}
   <section class="about" aria-labelledby="about-h">
     <span class="ab-ico" aria-hidden="true"><svg viewBox="0 0 64 52"><path d="M4 38 8 10l14 15L32 4l10 21 14-15 4 28Z" fill="currentColor"/><rect x="4" y="42" width="56" height="7" rx="2" fill="currentColor"/></svg></span>
     <div>
-      <h2 id="about-h">¿Quién está detrás?</h2>
-      <p>Soy Omar, y he creado El Rey de las Redes para que los creadores, sobre todo los que empiezan, tengan un sitio donde destacar en su nicho, y para que sus seguidores puedan demostrar qué comunidad es la más fiel.</p>
-      <p>Leo y contesto personalmente cada mensaje<span id="about-mail"></span>.</p>
+      <h2 id="about-h">¿Quiénes somos?</h2>
+      <p>El Rey de las Redes nace para que los creadores, sobre todo los que empiezan, tengan un sitio donde destacar en su nicho, y para que sus seguidores puedan demostrar qué comunidad es la más fiel.</p>
+      <p>Leemos y contestamos personalmente cada mensaje<span id="about-mail"></span>.</p>
     </div>
   </section>
 
@@ -731,7 +731,7 @@ footer .demo{margin-left:auto}
 
   function renderAbout() {
     const mail = ST.legal && ST.legal.email;
-    $('about-mail').innerHTML = mail ? `: escríbeme a <a href="mailto:${esc(mail)}">${esc(mail)}</a>` : '';
+    $('about-mail').innerHTML = mail ? `: escríbenos a <a href="mailto:${esc(mail)}">${esc(mail)}</a>` : '';
     if (mail) $('faq-inv').innerHTML = `Pídenos una por mensaje privado en nuestras redes o escribiendo a <a href="mailto:${esc(mail)}" style="color:var(--gold-ink)">${esc(mail)}</a>.`;
   }
 
