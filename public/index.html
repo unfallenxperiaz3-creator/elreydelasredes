@@ -544,7 +544,7 @@ footer .demo{margin-left:auto}
     return `<span class="avatar" aria-hidden="true">${esc(ini)}</span>`;
   }
   const net = p => { const c = (NETS[p] || NETS.tiktok).color; return `<span class="net" style="background:${c};border-color:${c};color:#FFE27A">${netName(p)}</span>`; };
-  const verMark = e => e.verified ? `<span class="ver">${CHECK}Verificado</span>` : `<span class="unver">${e.verifyRequested ? 'Verificación pendiente' : 'Sin verificar'}</span>`;
+  const verMark = e => e.verified ? `<span class="ver">${CHECK}Verificado</span>` : ''; // la verificación la hace el administrador a mano
   const fnd = e => e.founder ? `<span class="fnd" title="Uno de los 10 primeros creadores">Fundador nº${e.founder}</span>` : '';
   const invTag = e => e.invited ? '<span class="tag" style="color:var(--muted);border:1px solid #3a362f;border-radius:3px;padding:0 6px">Invitado</span>' : '';
   const foundersLeft = () => ST && ST.founders ? Math.max(0, ST.founders.total - ST.founders.taken) : 0;
@@ -681,7 +681,7 @@ footer .demo{margin-left:auto}
         <div class="racts">
           <button class="sbtn pri" data-support="${e.id}">Apoyar</button>
           <button class="sbtn" data-creator="${e.id}">Comunidad</button>
-          ${mine ? `<button class="sbtn" data-topup="${e.id}">Subir mi puja</button><button class="sbtn" data-copylink="${e.id}">Copiar mi enlace</button>${e.verified || e.verifyRequested ? '' : `<button class="sbtn" data-verify="${e.id}">Verificar</button>`}`
+          ${mine ? `<button class="sbtn" data-topup="${e.id}">Subir mi puja</button><button class="sbtn" data-copylink="${e.id}">Copiar mi enlace</button>`
                  : (i === 0 && hasKing()) ? '' : `<button class="sbtn link" data-steal="${i}" aria-label="Quitarle el puesto ${i + 1} a ${esc(e.name)} por ${eur(Math.max(MIN, t + 1))}">Soy creador: quitar puesto · ${eur(Math.max(MIN, t + 1))}</button>`}
         </div>
       </li>`;
@@ -794,7 +794,7 @@ footer .demo{margin-left:auto}
     openSheet(`<h3 id="sheet-title">Contacto y colaboraciones</h3>
       <p class="lead">Escríbenos para lo que necesites:</p>
       <div class="legal">
-        <p><b style="color:var(--ink)">Dudas y ayuda:</b> pagos, verificación, recuperar el acceso a tu cuenta o cualquier problema con la web.</p>
+        <p><b style="color:var(--ink)">Dudas y ayuda:</b> pagos, recuperar el acceso a tu cuenta o cualquier problema con la web.</p>
         <p><b style="color:var(--ink)">Colaboraciones y propuestas:</b> marcas, agencias, creadores que quieran organizar algo especial o cualquier propuesta de negocio.</p>
       </div>
       ${mail ? `<div class="box" style="text-align:center"><code style="font-size:16px">${esc(mail)}</code>
@@ -911,7 +911,6 @@ footer .demo{margin-left:auto}
           <label class="btn btn-outline" for="cs-photo" style="cursor:pointer">Cambiar foto o icono</label><input id="cs-photo" type="file" accept="image/*" style="position:absolute;left:-9999px">
           <button class="btn btn-outline" data-copylink="${e.id}">Copiar mi enlace de apoyo</button>
           <button class="btn btn-outline" data-shareimg="${e.id}">Imagen para mis historias</button>
-          ${e.verified ? '' : `<button class="btn btn-outline" data-verify="${e.id}">${e.verifyRequested ? 'Verificación pendiente' : 'Verificar mi cuenta'}</button>`}
         </div>
         <div class="err" id="er-acc" style="font-size:12px;color:var(--alert);margin-top:6px"></div>
       </div>` : ''}
@@ -1317,14 +1316,12 @@ footer .demo{margin-left:auto}
 
   async function successSheet(e, p, kind, info) {
     const np = nichePos(total(e), e.cat, e.id);
-    const vb = kind === 'creator' && isMine(e) && !e.verified ? await verifyBox(e) : '';
     openSheet(`
       <div class="done">
         <h3 id="sheet-title">${kind === 'fan' ? (info.isTop ? '¡Eres su fan nº1!' : '¡Gracias por tu apoyo!') : `Estás en el #${p}`}</h3>
         ${kind === 'creator' ? `<p class="lead" style="margin:0 0 6px;color:var(--gold-ink);font-weight:600">#${np} en ${CATS[e.cat]}${np === 1 ? ' · eres el rey de tu nicho' : ''}</p>` : ''}
         ${kind === 'creator' && e.founder ? `<p style="margin:0 0 12px"><span class="fnd" style="font-size:14px;padding:4px 12px">Eres Fundador nº${e.founder}</span></p>` : ''}
         <p class="lead">${kind === 'fan' ? `@${esc(e.handle)} va ahora #${p}.${info.monthly ? ` Tu apoyo de ${eur(info.amount)} se repetirá cada mes.` : ''} Sube esta imagen a tu historia para que se sumen más fans.` : 'Tu enlace ya recibe los clics de tu fila.'}</p>
-        ${vb}
         ${kind === 'creator' ? `<div class="box gold">
           <span class="t">Último paso: trae a tus seguidores</span>
           <code id="sup-link">${esc(supportLink(e))}</code>
@@ -1342,7 +1339,6 @@ footer .demo{margin-left:auto}
           <button class="btn btn-outline full" id="seeme">${kind === 'creator' ? 'Ir a mi comunidad' : 'Ver el ranking'}</button>
         </div>
       </div>`);
-    bindVerify(e);
     if ($('copylink')) $('copylink').addEventListener('click', () => copyText(supportLink(e), 'Enlace copiado: pégalo en tu bio'));
     $('copyshare').addEventListener('click', () => copyText(kind === 'fan'
       ? `${info.isTop ? 'Soy el fan nº1 de' : 'He apoyado a'} @${e.handle} en El Rey de las Redes y ya va #${p}. ¿Le ayudas a llegar al trono? ${supportLink(e)}`
@@ -1362,7 +1358,7 @@ footer .demo{margin-left:auto}
         'Solo pueden pagar mayores de 18 años con su propia tarjeta. Los creadores pagan desde 1 €. Los fans aportan entre 1 y 20 € por pago, una vez o cada mes. El apoyo mensual se puede cancelar en cualquier momento desde la comunidad del creador. Los pagos no son reembolsables.',
         'Los duelos duran 24 horas y los acepta el creador retado. Gana la comunidad que más aporte durante el duelo. El premio es visibilidad y el logro, nunca dinero.',
         'Las metas las fija cada creador y él es responsable de cumplirlas.',
-        'Para el sello de verificado hay que poner en la bio el código que te damos. Las fotos deben ser tuyas: retiramos sin reembolso las de otras personas o con contenido inapropiado.',
+        'El sello de verificado lo damos nosotros tras comprobar que la cuenta es real. Las fotos deben ser tuyas: retiramos sin reembolso las de otras personas o con contenido inapropiado.',
         'Solo se admiten enlaces a perfiles o contenidos propios. Retiramos sin reembolso las cuentas que suplanten a otra persona y los enlaces a estafas, contenido adulto, odio o material de terceros.',
         'Algunos creadores entran con una invitación gratuita: aparecen con la etiqueta «Invitado» y 0 €, sin ninguna ventaja en el orden del ranking.',
         'Los 10 primeros creadores que consiguen su puesto reciben la insignia de Fundador, que se queda en su perfil para siempre mientras la cuenta siga activa.',

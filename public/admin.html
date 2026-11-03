@@ -95,13 +95,14 @@ a{color:var(--gold)}
 
       ${invitesHTML(d)}
 
-      <h2>Verificaciones pendientes (${pending.length})</h2>
+      ${pending.length ? `<h2>Verificaciones pendientes (${pending.length})</h2>` : ''}
       ${pending.length ? `<div class="table"><table><tr><th>Cuenta</th><th>Código que debe tener en la bio</th><th>Pedido</th><th></th></tr>
         ${pending.map(c => `<tr><td><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.platform)} · @${esc(c.handle)}</a></td><td><b>${esc(c.verify_code)}</b></td><td>${fmt(c.verify_requested_at)}</td>
           <td><div class="acts"><button class="pri" data-a="approve" data-id="${c.id}">Aprobar</button><button data-a="reject" data-id="${c.id}">Rechazar</button></div></td></tr>`).join('')}</table></div>
-        <p class="muted" style="font-size:13px">Abre el perfil, comprueba que el código está en la bio y aprueba.</p>` : '<p class="muted">Nada pendiente.</p>'}
+        <p class="muted" style="font-size:13px">Abre el perfil, comprueba que el código está en la bio y aprueba.</p>` : ''}
 
       <h2>Creadores</h2>
+      <p class="muted" style="font-size:13px;margin-top:0">Para dar el sello verde, abre su perfil, comprueba que la cuenta es real y pulsa «Verificar».</p>
       <div class="table"><table><tr><th></th><th>Cuenta</th><th>Estado</th><th>Clics</th><th>Alta</th><th></th></tr>
         ${d.creators.map(c => `<tr>
           <td>${c.photo_url ? `<img src="${esc(c.photo_url)}" alt="">` : ''}</td>
