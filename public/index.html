@@ -408,11 +408,6 @@ footer .demo{margin-left:auto}
     <ol class="list" id="list"></ol>
     <div class="legend"><span><i style="background:#5a5650"></i>Pagado por el creador</span><span><i style="background:var(--gold)"></i>Aportado por sus fans</span></div>
     <div class="feed" id="feed" aria-live="polite" hidden></div>
-    <div class="fanbox">
-      <b>¿Tu creador favorito no está?</b>
-      <p>Invítale: si tiene 5.000 seguidores o más, puede pedir su entrada gratis. Mándale este mensaje y entre todos le subís al trono.</p>
-      <div class="acts"><button class="btn btn-primary" id="fan-invite">Copiar mensaje para mi creador</button><button class="btn btn-outline" id="fan-share" hidden>Compartir</button></div>
-    </div>
   </section>
 
   <section class="duels" id="duels-sec" aria-labelledby="duels-h" hidden>
@@ -782,13 +777,6 @@ footer .demo{margin-left:auto}
   });
   $('cta-main').addEventListener('click', () => openBid({}));
   $('cta-free').addEventListener('click', () => openBid({ request: true }));
-  // Mensaje que un fan le manda a su creador para que pida su entrada gratis
-  const fanMsg = () => `¡Hola! Creo que deberías estar en El Rey de las Redes 👑 Es un ranking de creadores donde tus seguidores te suben al número 1, y cada nicho tiene su propio rey. Si tienes 5.000 seguidores o más, puedes pedir tu entrada gratis aquí: ${location.origin}/?r=fan`;
-  $('fan-invite').addEventListener('click', () => { track('fan_invita'); copyText(fanMsg(), 'Mensaje copiado: pégaselo a tu creador por privado'); });
-  if (navigator.share) {
-    $('fan-share').hidden = false;
-    $('fan-share').addEventListener('click', () => { track('fan_invita'); navigator.share({ text: fanMsg() }).catch(() => {}); });
-  }
   $('contact').addEventListener('click', () => {
     const mail = ST?.legal?.email || '';
     openSheet(`<h3 id="sheet-title">Contacto y colaboraciones</h3>
