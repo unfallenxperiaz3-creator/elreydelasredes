@@ -181,7 +181,7 @@ a{color:var(--gold)}
         <div class="card"><span class="muted">Personas últimos 7 días</span><b>${sum(weekRows, 'uniques')}</b><span class="muted" style="font-size:12px">${sum(weekRows, 'views')} visitas a la página</span></div>
       </div>
       <div class="table" style="margin-top:10px"><table><tr><th>Embudo (7 días)</th><th>Personas</th><th></th></tr>
-        ${[['Entran en la web', sum(weekRows, 'uniques')], ['Abren el formulario de creador', ev('abre_puja')], ['Abren el formulario de apoyo', ev('abre_apoyo')], ['Pulsan «Pagar» y van a Stripe', ev('va_a_pagar')], ['Cancelan en Stripe', ev('cancela_pago')], ['Pagan', d.payments.filter(p => p.created_at >= days(6)).length]]
+        ${[['Entran en la web', sum(weekRows, 'uniques')], ['Abren el formulario de creador', ev('abre_puja')], ['Abren el formulario de entrada gratis', ev('abre_solicitud')], ['Envían la solicitud de entrada gratis', ev('envia_solicitud')], ['Abren el formulario de apoyo', ev('abre_apoyo')], ['Pulsan «Pagar» y van a Stripe', ev('va_a_pagar')], ['Cancelan en Stripe', ev('cancela_pago')], ['Pagan', d.payments.filter(p => p.created_at >= days(6)).length]]
           .map(([t, n]) => `<tr><td>${t}</td><td>${n}</td><td style="width:45%"><div style="height:8px;border-radius:4px;background:var(--gold);width:${Math.round(n / Math.max(1, sum(weekRows, 'uniques')) * 100)}%"></div></td></tr>`).join('')}
       </table></div>
       <div class="table" style="margin-top:10px"><table><tr><th>De dónde vienen (7 días)</th><th>Personas</th><th>Visitas</th></tr>
