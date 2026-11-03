@@ -78,6 +78,7 @@ a{color:var(--gold)}
         <div class="card"><span class="muted">Apoyos mensuales activos</span><b>${d.activeSubs}</b></div>
       </div>
       <p class="muted" style="font-size:12px">* De los últimos 100 pagos. El dato exacto, con comisiones, está en tu panel de Stripe.</p>
+      <div class="acts" style="margin:8px 0 0"><button data-a="testNotify">Probar aviso de Telegram</button></div>
 
       <h2>Solicitudes de entrada gratis (${reqs.length})</h2>
       ${reqs.length ? `<div class="table"><table><tr><th></th><th>Cuenta</th><th>Nicho</th><th>Dice tener</th><th>Pedido</th><th></th></tr>
@@ -206,6 +207,7 @@ a{color:var(--gold)}
     try {
       const r = await call('POST', { action: a, creatorId: b.dataset.id });
       await load();
+      if (a === 'testNotify') $('msg').textContent = 'Aviso enviado: mira tu Telegram.';
       if (r.ownerToken) $('token-out').innerHTML = `<div class="token">Acceso nuevo creado. Envíaselo al dueño real de la cuenta para que lo pegue en la web (Comunidad → Recuperar acceso):<br><br>${esc(b.dataset.id)}:${esc(r.ownerToken)}</div>`;
     } catch (e) { $('msg').textContent = e.message; b.disabled = false; }
   });

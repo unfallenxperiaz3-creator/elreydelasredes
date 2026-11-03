@@ -1,6 +1,7 @@
 // Panel de administrador. Protegido con la contraseña ADMIN_PASSWORD.
 import { db, json, fail, readJson, safeEqual, newToken, seasonKey, madridDay, cleanText } from '../lib/core.js';
 import { randomBytes } from 'node:crypto';
+import { notify, tg } from '../lib/notify.js';
 
 function allowed(request) {
   return !!process.env.ADMIN_PASSWORD && safeEqual(request.headers.get('x-admin-password') || '', process.env.ADMIN_PASSWORD);
@@ -71,6 +72,10 @@ export async function POST(request) {
       const { error } = await db().from('invites').update({ expires_at: new Date().toISOString() }).eq('code', String(b.code || ''));
       if (error) return fail(error.message, 500);
       return json({ ok: true });
+    }
+    case 'testNotify': {
+      const r = await notify(['✅ ' + tg.b('¡Avisos activados!'), 'A partir de ahora te llegará aquí cada solicitud, cada creador nuevo y cada pago de El Rey de las Redes 👑']);
+      return r.ok ? json({ ok: true }) : fail(r.error, 400);
     }
     case 'resetOwner': {
       const token = newToken();

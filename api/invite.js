@@ -1,6 +1,7 @@
 // Invitaciones gratis: comprobar un enlace (GET) y apuntarse con él (POST).
 import { db, json, fail, readJson, cleanText, seasonKey } from '../lib/core.js';
 import { claimNewCreator } from '../lib/claim.js';
+import { notify, tg, NET_NAMES } from '../lib/notify.js';
 
 const CODE_RE = /^[A-Za-z0-9]{6,20}$/;
 
@@ -34,5 +35,7 @@ export async function POST(request) {
     await db().from('creators').delete().eq('id', res.creator.id);
     return fail('Esta invitación acaba de agotarse. Pide otra a quien te la envió.', 410);
   }
+  const n = b.newCreator || {};
+  await notify(['👑 ' + tg.b('Nuevo creador con invitación'), `@${tg.esc(res.creator.handle)} · ${tg.esc(NET_NAMES[n.platform] || n.platform)}`, n.url ? tg.esc(n.url) : '']);
   return json({ creatorId: res.creator.id, ownerToken: res.ownerToken });
 }
